@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import pytest
+import requests
 
 from qintent import QIntentClient
+from qintent.exceptions import QIntentAPIError
 
 
 def test_normalizes_api_url() -> None:
@@ -56,3 +58,16 @@ def test_get_request_does_not_send_empty_json_body(monkeypatch: pytest.MonkeyPat
     assert result["status"] == "SUCCESS"
     assert calls["method"] == "GET"
     assert "json" not in calls["kwargs"]
+
+
+def test_private_node_transport_error_is_user_friendly(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fake_request(method, url, **kwargs):
+        raise requests.ConnectionError("connection refused")
+
+    monkeypatch.setattr("qintent.client.requests.request", fake_request)
+
+    with pytest.raises(QIntentAPIError) as exc:
+        QIntentClient.local().spec()
+
+    assert "Private QDSV node temporarily unavailable" in str(exc.value)
+    assert "public cloud examples" in str(exc.value)

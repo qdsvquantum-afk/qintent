@@ -43,5 +43,6 @@ Use Docker/private local API:
 client = QIntentClient.local()
 ```
 
-QIntent is a declarative intent language powered by QDSV. The SDK is a client only; it does not install QDSV Runtime locally.
+Private Docker/local execution is available only when a private QDSV node is online. If it is unavailable, it may be offline, reserved for private processing, or temporarily busy. Use `QIntentClient()` for public cloud examples.
 
+QIntent is a declarative intent language powered by QDSV. The SDK is a client only; it does not install QDSV Runtime locally.

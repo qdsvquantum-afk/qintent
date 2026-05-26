@@ -114,6 +114,20 @@ QDSV_LICENSE_KEY=...
 
 The SDK is a client. It does not grant access to private backends by itself; available capabilities depend on the API endpoint, account, license, deployment, and backend policy.
 
+## Data and workload policy
+
+The public QIntent API is intended for lightweight evaluation:
+
+- quickstarts
+- notebooks
+- examples
+- small datasets
+- public preview experiments
+
+It should not be used for large datasets, private business data, long-running jobs, or heavy backend usage. Public endpoints may enforce row limits, payload limits, backend limits, and execution time limits to protect the shared free/preview infrastructure.
+
+For larger datasets, sensitive data, or heavier workloads, use Qruba Cloud with an appropriate license or a private Docker/local QDSV node.
+
 ## Backends
 
 The SDK can request a backend:
@@ -137,6 +151,18 @@ For a local Docker/private demo API:
 
 ```python
 client = QIntentClient.local()
+```
+
+Private Docker/local execution is available only when a private QDSV node is online:
+
+```python
+client = QIntentClient(api_url="https://qintent-local.qdsv.cloud/api")
+```
+
+If the private node is unavailable, it may be offline, reserved for private processing, or temporarily busy. Try again later or use the public cloud endpoint for lightweight examples:
+
+```python
+client = QIntentClient()
 ```
 
 ## CLI

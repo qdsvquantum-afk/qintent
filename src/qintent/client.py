@@ -11,6 +11,11 @@ from .exceptions import QIntentAPIError, QIntentHTTPError
 
 
 DEFAULT_API_URL = "https://api.qdsv.cloud/api"
+PRIVATE_NODE_UNAVAILABLE_MESSAGE = (
+    "Private QDSV node temporarily unavailable. It may be offline, reserved for "
+    "private processing, or busy. Try again later or use QIntentClient() for "
+    "public cloud examples."
+)
 
 
 class QIntentClient:
@@ -36,6 +41,7 @@ class QIntentClient:
         self.license_key = license_key or os.getenv("QDSV_LICENSE_KEY")
         self.timeout = timeout
         self.sdk_name = sdk_name
+        self._private_node = self._looks_like_private_node(self.api_url)
 
     @classmethod
     def local(
@@ -55,7 +61,7 @@ class QIntentClient:
         clean = str(value or "").strip().rstrip("/")
         if not clean:
             return DEFAULT_API_URL
-        return clean if clean.endswith("/api") else f"{clean}/api"
+        return clean if clean.lower().endswith("/api") else f"{clean}/api"
 
     def _headers(self) -> dict[str, str]:
         headers = {
@@ -67,6 +73,16 @@ class QIntentClient:
         if self.license_key:
             headers["x-license-key"] = self.license_key
         return headers
+
+    @staticmethod
+    def _looks_like_private_node(api_url: str) -> bool:
+        clean = str(api_url or "").lower()
+        return (
+            "localhost" in clean
+            or "127.0.0.1" in clean
+            or "qintent-local.qdsv.cloud" in clean
+            or "qruba.site" in clean
+        )
 
     def _request(self, method: str, path: str, *, json: Mapping[str, Any] | None = None) -> dict[str, Any]:
         url = f"{self.api_url}{path}"
@@ -83,6 +99,8 @@ class QIntentClient:
                 **request_kwargs,
             )
         except requests.RequestException as exc:
+            if self._private_node:
+                raise QIntentAPIError(PRIVATE_NODE_UNAVAILABLE_MESSAGE) from exc
             raise QIntentAPIError(str(exc)) from exc
 
         try:

@@ -42,6 +42,14 @@ Public API
 Private Core
 ```
 
+## Data and availability policy
+
+The public API is for lightweight examples, notebooks, and evaluation. It may enforce row, payload, backend, and execution limits.
+
+For larger datasets, sensitive data, or heavier workloads, use Qruba Cloud with an appropriate license or a private Docker/local QDSV node.
+
+Private Docker/local nodes are availability-limited. If a private node is not reachable, it may be offline, reserved for private processing, or temporarily busy. This should be treated as limited availability, not as a public cloud outage.
+
 ## Trademark note
 
 QDSV, QIntent, and Qruba names and marks are project marks of their respective owners. The MIT License for this repository does not grant trademark rights.
