@@ -2,7 +2,9 @@
 
 This document describes the stable public preview subset exposed by the `qdsv-qintent` SDK.
 
-QIntent is a declarative, Python-like language for expressing computational intent over state spaces, predicates, rows, ranking, and sampling.
+QIntent is a declarative quantum-intent language for expressing computational intent over state spaces, predicates, rows, ranking, and sampling.
+
+The syntax is Python-inspired for developer ergonomics. The semantics are QDSV-native: state spaces, predicates, ranking, sampling, evidence, and backend-independent execution intent.
 
 ## Row selection
 
@@ -23,7 +25,7 @@ find(x).where(x in [3, 6, 9])
 
 `range(...)` is accepted as a familiar alias in the public preview.
 
-## Python-like expressions
+## Expression ergonomics
 
 Supported preview syntax:
 
@@ -72,3 +74,5 @@ receive results and evidence
 ```
 
 The SDK does not install QDSV Runtime locally.
+
+QDSV may execute QIntent directly through semantic/logical or statevector routes when possible. Circuit materialization is optional and is used only when a selected backend requires it.

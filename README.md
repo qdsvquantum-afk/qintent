@@ -4,7 +4,9 @@ Lightweight Python SDK for **QIntent**, the native quantum-intent language power
 
 QIntent lets you write declarative computational intent over state spaces, predicates, rows, ranking, and sampling without writing circuits first or installing the QDSV Runtime locally.
 
-QIntent is designed for quantum-oriented semantic computation: users describe what states, candidates, constraints, and evidence matter; QDSV decides how that intent is compiled, routed, and executed by logical, simulated, or quantum-capable backends.
+QIntent is designed for quantum-oriented semantic computation: users describe what states, candidates, constraints, and evidence matter; QDSV decides how that intent is compiled, routed, and executed by logical, statevector, simulator, or quantum-capable backends.
+
+QIntent does not require circuits as the starting point. QDSV may execute a problem directly through semantic/logical routes when possible, and only materializes circuits when a selected backend requires that representation. This is one of the core differences from circuit-first quantum SDKs.
 
 ```bash
 pip install qdsv-qintent
@@ -45,7 +47,7 @@ print(result["status"])
 print(result["result"]["selected_rows"])
 ```
 
-## Python-like QIntent
+## QIntent Syntax
 
 ```python
 source = """
@@ -57,6 +59,8 @@ find(x).where(all([700 <= score <= 950, x not in [0, 1]])).rank_by(score).top_k(
 compiled = client.compile(source)
 print(compiled["compiled_summary"])
 ```
+
+QIntent uses Python-inspired syntax for ergonomics, but its semantics are QDSV-native: state spaces, predicates, ranking, sampling, evidence, and backend-independent execution intent.
 
 Supported preview patterns include:
 
@@ -83,6 +87,52 @@ client.compile(source, rows=None, backend="logical")
 client.run(source, rows=None, backend="logical")
 ```
 
+## Authentication and access
+
+The public preview can be used without a user key for small examples and public QIntent endpoints:
+
+```python
+client = QIntentClient()
+```
+
+The SDK can also send credentials when your Qruba/QDSV deployment or license requires them:
+
+```python
+client = QIntentClient(
+    api_key="...",
+    license_key="...",
+)
+```
+
+Environment variables are also supported:
+
+```bash
+QINTENT_API_URL=https://api.qdsv.cloud/api
+QINTENT_API_KEY=...
+QDSV_LICENSE_KEY=...
+```
+
+The SDK is a client. It does not grant access to private backends by itself; available capabilities depend on the API endpoint, account, license, deployment, and backend policy.
+
+## Backends
+
+The SDK can request a backend:
+
+```python
+client.run(source, backend="logical")
+client.run(source, backend="quest")
+client.run(source, backend="aer")
+```
+
+Backend availability depends on the public API or Qruba deployment you are using.
+
+- `logical`: deterministic semantic execution, useful for fast validation and examples.
+- `quest`: QDSV statevector route. This path can inspect and execute the semantic problem directly over the state space without requiring the user to write circuits.
+- `aer`: circuit/simulator materialization when the deployment supports it.
+- IBM/hardware routes are not part of the default public SDK preview; they are available through Qruba/full platform configurations when enabled.
+
+For large datasets or production workloads, use a licensed Qruba/QDSV deployment. Public preview endpoints may enforce row, payload, backend, and execution limits.
+
 For a local Docker/private demo API:
 
 ```python
@@ -98,17 +148,9 @@ qintent compile 'x = domain(0, 15); find(x).where(x in [3, 6, 9])'
 qintent run 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv
 ```
 
-Environment variables:
-
-```bash
-QINTENT_API_URL=https://api.qdsv.cloud/api
-QINTENT_API_KEY=...
-QDSV_LICENSE_KEY=...
-```
-
 ## Public Preview Limits
 
-The public preview intentionally exposes a stable subset. Advanced QDSV families such as crypto, sensing, AI semantic operations, hardware routing, and mitigation internals may compile or run only through Qruba full platform endpoints depending on your license.
+The public preview intentionally exposes a stable subset. Advanced QDSV families such as crypto, sensing, AI semantic operations, hardware routing, large-data execution, and mitigation internals may compile or run only through Qruba full platform endpoints depending on your license.
 
 Write QIntent locally. Execute on QDSV.
 
