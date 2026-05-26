@@ -1,14 +1,27 @@
-# qdsv-qintent
+# QIntent Developer Preview
 
-Lightweight Python client for **QIntent**, the native intent language powered by QDSV.
+Lightweight Python SDK for **QIntent**, the native quantum-intent language powered by **QDSV**.
 
-QIntent lets you write declarative computational intent over state spaces, rows, predicates, ranking, and sampling without installing the QDSV runtime locally.
+QIntent lets you write declarative computational intent over state spaces, predicates, rows, ranking, and sampling without writing circuits first or installing the QDSV Runtime locally.
+
+QIntent is designed for quantum-oriented semantic computation: users describe what states, candidates, constraints, and evidence matter; QDSV decides how that intent is compiled, routed, and executed by logical, simulated, or quantum-capable backends.
 
 ```bash
 pip install qdsv-qintent
 ```
 
-> Developer Preview: the package is a client SDK. It does not include QDSV Runtime, CAP, QuEST, Aer, IBM adapters, lowering, noise mitigation internals, or crypto internals.
+> Developer Preview: this package is a client SDK. It does not include QDSV Runtime, CAP, backend selection, QuEST/Aer/IBM adapters, lowering, noise mitigation internals, crypto internals, private endpoints, credentials, or advanced orchestration logic.
+
+## Open SDK, Private Runtime
+
+This repository is intentionally open-core:
+
+- **Open under MIT:** Python SDK, CLI, examples, notebooks, public preview docs, and public grammar notes.
+- **Not included:** QDSV Runtime, CAP, backend selector, lowering, QuEST/Aer/IBM adapters, optimization layers, noise mitigation internals, crypto internals, private endpoints, keys, secrets, or production platform configuration.
+
+QIntent SDKs and examples are released under the MIT License. QDSV Runtime, backend execution, optimization layers, quantum adapters, and internal orchestration components are not included in this repository and remain proprietary/private unless explicitly released under a separate license.
+
+QDSV, QIntent, and Qruba names and marks are project marks of their respective owners. The MIT License for this repository does not grant trademark rights.
 
 ## Quick Start
 
@@ -58,6 +71,8 @@ Supported preview patterns include:
 - `all([...])`, `any([...])`
 - `abs(...)`, `round(...)`, `min(...)`, `max(...)`, `clip(...)`
 
+See [grammar/QINTENT_PREVIEW.md](grammar/QINTENT_PREVIEW.md) for the public preview grammar notes.
+
 ## Methods
 
 ```python
@@ -96,3 +111,10 @@ QDSV_LICENSE_KEY=...
 The public preview intentionally exposes a stable subset. Advanced QDSV families such as crypto, sensing, AI semantic operations, hardware routing, and mitigation internals may compile or run only through Qruba full platform endpoints depending on your license.
 
 Write QIntent locally. Execute on QDSV.
+
+## Links
+
+- QDSV landing: https://qdsv.cloud
+- QIntent site: https://qintent.qdsv.cloud
+- Public API spec: https://api.qdsv.cloud/api/qintent/spec
+- PyPI: https://pypi.org/project/qdsv-qintent/
