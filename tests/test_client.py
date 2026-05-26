@@ -4,7 +4,7 @@ import pytest
 import requests
 
 from qintent import QIntentClient
-from qintent.exceptions import QIntentAPIError
+from qintent.exceptions import QIntentAPIError, QIntentHTTPError
 
 
 def test_normalizes_api_url() -> None:
@@ -71,3 +71,37 @@ def test_private_node_transport_error_is_user_friendly(monkeypatch: pytest.Monke
 
     assert "Private QDSV node temporarily unavailable" in str(exc.value)
     assert "public cloud examples" in str(exc.value)
+
+
+def test_public_cloud_transport_error_keeps_original_message(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fake_request(method, url, **kwargs):
+        raise requests.Timeout("cloud timeout")
+
+    monkeypatch.setattr("qintent.client.requests.request", fake_request)
+
+    with pytest.raises(QIntentAPIError) as exc:
+        QIntentClient().spec()
+
+    assert "cloud timeout" in str(exc.value)
+    assert "Private QDSV node temporarily unavailable" not in str(exc.value)
+
+
+def test_private_node_http_error_is_not_hidden(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeResponse:
+        ok = False
+        status_code = 429
+
+        @staticmethod
+        def json():
+            return {"detail": {"error_code": "E_RATE_LIMIT", "message": "Rate limit"}}
+
+    def fake_request(method, url, **kwargs):
+        return FakeResponse()
+
+    monkeypatch.setattr("qintent.client.requests.request", fake_request)
+
+    with pytest.raises(QIntentHTTPError) as exc:
+        QIntentClient.local().spec()
+
+    assert exc.value.status_code == 429
+    assert exc.value.payload["detail"]["error_code"] == "E_RATE_LIMIT"
