@@ -66,6 +66,14 @@ QIntent uses Python-inspired syntax for ergonomics, but its semantics are QDSV-n
 
 QIntent works from the intention and formulation of the problem: users declare the search, condition, ranking, decision, verification, or state-space relationship they need, and QDSV decides how to represent and execute it. Circuits are not the starting point; they are only a possible materialization when a backend requires them.
 
+Traditional quantum frameworks often ask users to translate the problem into an algorithm or circuit first. QIntent takes a different path: users declare the problem intent, and QDSV determines the representation and execution route.
+
+This aligns naturally with the way quantum systems are reasoned about:
+
+- Quantum physics works with states, superposition, amplitudes, probability, observation, distributions, and measurement.
+- QIntent/QDSV starts from state spaces, conditions over states, solution mass, ranking, probability, and evidence.
+- Circuits remain valid, but they are an operational way to materialize execution, not necessarily the natural language of the problem.
+
 | Language / layer | What it tries to be | How QIntent is different | User benefit |
 |---|---|---|---|
 | Classiq Qmod | A high-level model for designing quantum algorithms and synthesizing circuits. | Qmod abstracts circuit creation. QIntent starts from the problem intent and only materializes circuits if the backend requires them. | Users can formulate search, ranking, or decision problems without starting by designing circuits. |
