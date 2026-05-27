@@ -1,12 +1,12 @@
 # QIntent Developer Preview
 
-Lightweight Python SDK for **QIntent**, the native quantum-intent language powered by **QDSV**.
+Lightweight Python SDK for **QIntent**, the native intent-first quantum language powered by **QDSV**.
 
-QIntent lets you write declarative computational intent over state spaces, predicates, rows, ranking, and sampling without writing circuits first or installing the QDSV Runtime locally.
+QIntent lets users declare what they want to find, evaluate, rank, sample, or verify over state spaces, predicates, rows, and evidence. QDSV then decides how to represent and execute that intent.
 
-QIntent is designed for quantum-oriented semantic computation: users describe what states, candidates, constraints, and evidence matter; QDSV decides how that intent is compiled, routed, and executed by statevector, simulator, or quantum-capable backends.
+QIntent is designed for quantum-oriented semantic computation: users describe the problem intent and the meaningful states, candidates, constraints, and evidence; QDSV decides how that intent is compiled, routed, and executed by statevector, simulator, or quantum-capable backends.
 
-QIntent does not require circuits as the starting point. QDSV may execute a problem directly through semantic/statevector routes when possible, and only materializes circuits when a selected backend requires that representation. The public SDK defaults to the QDSV QuEST route because it is designed to execute QIntent over state spaces without requiring users to write circuits first.
+Not starting from circuits is a consequence of the model, not the main idea. QIntent starts from computational intent. QDSV may execute that intent directly through semantic/statevector routes when possible, and only materializes circuits when a selected backend requires that representation. The public SDK defaults to the QDSV QuEST route because it is designed to execute QIntent over state spaces from the declared intent.
 
 ```bash
 pip install qdsv-qintent
@@ -60,11 +60,11 @@ compiled = client.compile(source)
 print(compiled["compiled_summary"])
 ```
 
-QIntent uses Python-inspired syntax for ergonomics, but its semantics are QDSV-native: state spaces, predicates, ranking, sampling, evidence, and backend-independent execution intent.
+QIntent uses Python-inspired syntax for ergonomics, but its semantics are QDSV-native: computational intent, state spaces, predicates, ranking, sampling, evidence, and backend-independent execution.
 
 ## How QIntent Differs
 
-QIntent works from the intention and formulation of the problem: users declare the search, condition, ranking, decision, or state-space relationship they need, and QDSV decides how to execute it. Circuits are not the starting point; they are only a possible materialization when a backend requires them.
+QIntent works from the intention and formulation of the problem: users declare the search, condition, ranking, decision, verification, or state-space relationship they need, and QDSV decides how to represent and execute it. Circuits are not the starting point; they are only a possible materialization when a backend requires them.
 
 | Language / layer | What it tries to be | How QIntent is different | User benefit |
 |---|---|---|---|
