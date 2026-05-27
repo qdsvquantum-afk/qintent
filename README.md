@@ -4,9 +4,9 @@ Lightweight Python SDK for **QIntent**, the native quantum-intent language power
 
 QIntent lets you write declarative computational intent over state spaces, predicates, rows, ranking, and sampling without writing circuits first or installing the QDSV Runtime locally.
 
-QIntent is designed for quantum-oriented semantic computation: users describe what states, candidates, constraints, and evidence matter; QDSV decides how that intent is compiled, routed, and executed by logical, statevector, simulator, or quantum-capable backends.
+QIntent is designed for quantum-oriented semantic computation: users describe what states, candidates, constraints, and evidence matter; QDSV decides how that intent is compiled, routed, and executed by statevector, simulator, or quantum-capable backends.
 
-QIntent does not require circuits as the starting point. QDSV may execute a problem directly through semantic/logical routes when possible, and only materializes circuits when a selected backend requires that representation. This is one of the core differences from circuit-first quantum SDKs.
+QIntent does not require circuits as the starting point. QDSV may execute a problem directly through semantic/statevector routes when possible, and only materializes circuits when a selected backend requires that representation. The public SDK defaults to the QDSV QuEST route because it is designed to execute QIntent over state spaces without requiring users to write circuits first.
 
 ```bash
 pip install qdsv-qintent
@@ -62,6 +62,20 @@ print(compiled["compiled_summary"])
 
 QIntent uses Python-inspired syntax for ergonomics, but its semantics are QDSV-native: state spaces, predicates, ranking, sampling, evidence, and backend-independent execution intent.
 
+## How QIntent Differs
+
+QIntent works from the intention and formulation of the problem: users declare the search, condition, ranking, decision, or state-space relationship they need, and QDSV decides how to execute it. Circuits are not the starting point; they are only a possible materialization when a backend requires them.
+
+| Lenguaje / capa | Qué intenta ser | Diferencia de QIntent | Beneficio para el usuario |
+|---|---|---|---|
+| Classiq Qmod | Modelo de alto nivel para diseñar algoritmos cuánticos y sintetizar circuitos. | Qmod abstrae la creación de circuitos. QIntent parte de la intención del problema y solo materializa circuitos si el backend lo exige. | Permite formular problemas como búsqueda, ranking o decisión sin empezar diseñando circuitos. |
+| Q# | Lenguaje formal para programar algoritmos cuánticos e híbridos. | Q# sigue siendo programación cuántica. QIntent es declaración de intención sobre espacios de estados. | Reduce la necesidad de saber programación cuántica detallada para expresar problemas ejecutables. |
+| QIR | Representación intermedia para conectar lenguajes y backends. | QIR no está pensado para usuarios finales. QIntent sí es una interfaz declarativa usable por personas y SDKs. | El usuario escribe intención legible y QDSV decide la ruta de ejecución. |
+| OpenQASM 3 | Lenguaje para describir circuitos, operaciones y control cercano al hardware. | OpenQASM describe cómo ejecutar operaciones cuánticas. QIntent describe qué condición, búsqueda o decisión debe resolverse. | Evita obligar al usuario a escribir compuertas, mediciones y control de bajo nivel desde el inicio. |
+| Qiskit / Cirq / QPanda | Frameworks para construir, simular y ejecutar circuitos o algoritmos cuánticos. | Son herramientas potentes, pero circuit/program-first. QIntent es intent/state-space-first. | Permite llevar problemas de datos, decisión o búsqueda a ejecución QDSV, QuEST, Aer o hardware sin rediseñarlos manualmente como circuitos. |
+| PennyLane | Framework para QML, diferenciación y optimización híbrida. | PennyLane es fuerte en modelos entrenables y QML. QIntent es más general para predicados, scoring, ranking, búsqueda y selección. | Sirve cuando el usuario no quiere entrenar un modelo QML, sino evaluar candidatos o condiciones con evidencia. |
+| Silq / Qrisp | Lenguajes de alto nivel para hacer más cómoda la programación cuántica. | Buscan simplificar la programación cuántica. QIntent busca evitar programar cuando el problema puede expresarse semánticamente. | Baja la barrera de entrada: el usuario declara el problema y QDSV decide cómo ejecutarlo. |
+
 Supported preview patterns include:
 
 - `find_rows(...).where(...)`
@@ -82,9 +96,9 @@ See [grammar/QINTENT_PREVIEW.md](grammar/QINTENT_PREVIEW.md) for the public prev
 ```python
 client.spec()
 client.examples()
-client.validate(source, rows=None, backend="logical")
-client.compile(source, rows=None, backend="logical")
-client.run(source, rows=None, backend="logical")
+client.validate(source, rows=None, backend="quest")
+client.compile(source, rows=None, backend="quest")
+client.run(source, rows=None, backend="quest")
 ```
 
 ## Authentication and access
@@ -130,18 +144,17 @@ For larger datasets, sensitive data, or heavier workloads, use Qruba Cloud with 
 
 ## Backends
 
-The SDK can request a backend:
+The SDK defaults to the QDSV QuEST route:
 
 ```python
-client.run(source, backend="logical")
+client.run(source)
 client.run(source, backend="quest")
 client.run(source, backend="aer")
 ```
 
 Backend availability depends on the public API or Qruba deployment you are using.
 
-- `logical`: deterministic semantic execution, useful for fast validation and examples.
-- `quest`: QDSV statevector route. This path can inspect and execute the semantic problem directly over the state space without requiring the user to write circuits.
+- `quest`: default QDSV statevector route. This path can inspect and execute the semantic problem directly over the state space without requiring the user to write circuits.
 - `aer`: circuit/simulator materialization when the deployment supports it.
 - IBM/hardware routes are not part of the default public SDK preview; they are available through Qruba/full platform configurations when enabled.
 

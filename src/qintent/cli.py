@@ -39,7 +39,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--api-key", default=None, help="Optional API bearer token")
     parser.add_argument("--license-key", default=None, help="Optional QDSV/Qruba license key")
     parser.add_argument("--rows", default=None, help="CSV or JSON file with rows for find_rows/field queries")
-    parser.add_argument("--backend", default="logical", help="logical or quest in public preview")
+    parser.add_argument("--backend", default="quest", help="Execution backend. Public preview default: quest")
     parser.add_argument("--backend-mode", default=None)
     parser.add_argument("--shots", type=int, default=256)
     return parser
@@ -78,4 +78,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

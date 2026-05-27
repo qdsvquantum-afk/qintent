@@ -10,9 +10,8 @@ find(x).where(all([score >= 7, score <= 9, x not in [8]])).rank_by(score).top_k(
 """
 
 compiled = client.compile(source)
-executed = client.run(source, backend="logical")
+executed = client.run(source)
 
 print(compiled["compiled_summary"])
 print(executed["status"])
 print(executed["result"].get("ranked_candidates"))
-

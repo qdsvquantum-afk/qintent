@@ -127,7 +127,7 @@ class QIntentClient:
         source: str,
         *,
         rows: Sequence[Mapping[str, Any]] | None = None,
-        backend: str = "logical",
+        backend: str = "quest",
         backend_mode: str | None = None,
         shots: int = 256,
     ) -> dict[str, Any]:
@@ -142,7 +142,7 @@ class QIntentClient:
         source: str,
         *,
         rows: Sequence[Mapping[str, Any]] | None = None,
-        backend: str = "logical",
+        backend: str = "quest",
         backend_mode: str | None = None,
         shots: int = 256,
     ) -> dict[str, Any]:
@@ -157,7 +157,7 @@ class QIntentClient:
         source: str,
         *,
         rows: Sequence[Mapping[str, Any]] | None = None,
-        backend: str = "logical",
+        backend: str = "quest",
         backend_mode: str | None = None,
         shots: int = 256,
     ) -> dict[str, Any]:

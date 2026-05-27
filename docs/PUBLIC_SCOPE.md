@@ -31,7 +31,7 @@ The following components are not part of this repository:
 
 QIntent is the public language and SDK layer. QDSV is the underlying semantic computation model and runtime. Qruba is the commercial platform built on top of QDSV.
 
-QIntent is not a circuit-authoring language. It is a quantum-intent language. QDSV can execute a problem without circuits through semantic/logical or statevector routes when available, and can materialize circuits only when the selected backend requires them.
+QIntent is not a circuit-authoring language. It is a quantum-intent language. QDSV can execute a problem without circuits through semantic/statevector routes when available, and can materialize circuits only when the selected backend requires them.
 
 The intended product architecture is:
 

@@ -18,12 +18,12 @@ def test_payload_includes_rows_and_backend() -> None:
     payload = QIntentClient._payload(
         'find_rows("candidate_index").where("score", ">=", 850)',
         rows=[{"candidate_index": 0, "score": 900}],
-        backend="logical",
+        backend="quest",
         backend_mode=None,
         shots=256,
     )
 
-    assert payload["backend"] == "logical"
+    assert payload["backend"] == "quest"
     assert payload["shots"] == 256
     assert payload["rows"] == [{"candidate_index": 0, "score": 900}]
 

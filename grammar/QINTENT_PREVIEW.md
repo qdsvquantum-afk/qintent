@@ -75,4 +75,4 @@ receive results and evidence
 
 The SDK does not install QDSV Runtime locally.
 
-QDSV may execute QIntent directly through semantic/logical or statevector routes when possible. Circuit materialization is optional and is used only when a selected backend requires it.
+QDSV may execute QIntent directly through semantic/statevector routes when possible. Circuit materialization is optional and is used only when a selected backend requires it.
