@@ -11,6 +11,8 @@ This repository is the public Developer Preview for QIntent.
 - Tests for the public SDK surface
 - Public preview grammar notes
 - Documentation for using QIntent through the QDSV public API
+- QIntent Explain / Semantic Execution Passport
+- Controlled QDSV helpers for comparison, logic, ranges, tolerance, safe division, null handling, numeric bounds, and row-level signal aggregation
 
 ## Not included
 

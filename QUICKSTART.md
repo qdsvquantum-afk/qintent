@@ -37,6 +37,31 @@ compiled = client.compile(
 print(compiled["compiled_summary"])
 ```
 
+Explain an intent before running it:
+
+```python
+passport = client.explain(
+    'i = domain(0, 3)\nfind(i).where(within_tolerance(field(i, "amount_a"), field(i, "amount_b"), 5))',
+    rows=[
+        {"candidate_index": 0, "amount_a": 100, "amount_b": 104},
+        {"candidate_index": 1, "amount_a": 100, "amount_b": 130},
+    ],
+)
+
+print(passport["semantic_execution_passport"]["execution_plan"])
+```
+
+Use controlled QDSV helpers:
+
+```python
+source = """
+i = domain(0, 3)
+gap = abs_diff(field(i, "amount_a"), field(i, "amount_b"))
+score = weighted_sum([coalesce(field(i, "quality"), 0), max(0, 1000 - gap)], [0.6, 0.4])
+find(i).where(between(score, 700, 1000)).rank_by(score).top_k(2)
+"""
+```
+
 Use Docker/private local API:
 
 ```python

@@ -33,7 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="qintent",
         description="Run QIntent source through a QDSV API.",
     )
-    parser.add_argument("command", choices=["spec", "examples", "validate", "compile", "run"])
+    parser.add_argument("command", choices=["spec", "examples", "validate", "compile", "explain", "run"])
     parser.add_argument("source", nargs="?", help="QIntent source string or path to a .qi file")
     parser.add_argument("--api-url", default=None, help="Base API URL, for example https://api.qdsv.cloud/api")
     parser.add_argument("--api-key", default=None, help="Optional API bearer token")

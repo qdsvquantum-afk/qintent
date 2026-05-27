@@ -28,6 +28,43 @@ def test_payload_includes_rows_and_backend() -> None:
     assert payload["rows"] == [{"candidate_index": 0, "score": 900}]
 
 
+def test_explain_calls_public_explain_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = {}
+
+    class FakeResponse:
+        ok = True
+        status_code = 200
+
+        @staticmethod
+        def json():
+            return {
+                "status": "SUCCESS",
+                "product": "QIntent Explain",
+                "semantic_execution_passport": {
+                    "execution_plan": {"selected_backend": "quest", "uses_circuits": False}
+                },
+            }
+
+    def fake_request(method, url, **kwargs):
+        calls["method"] = method
+        calls["url"] = url
+        calls["kwargs"] = kwargs
+        return FakeResponse()
+
+    monkeypatch.setattr("qintent.client.requests.request", fake_request)
+
+    result = QIntentClient().explain(
+        'find_rows("candidate_index").where("score", ">=", 850)',
+        rows=[{"candidate_index": 0, "score": 900}],
+    )
+
+    assert result["product"] == "QIntent Explain"
+    assert calls["method"] == "POST"
+    assert calls["url"].endswith("/qintent/explain")
+    assert calls["kwargs"]["json"]["backend"] == "quest"
+    assert calls["kwargs"]["json"]["rows"] == [{"candidate_index": 0, "score": 900}]
+
+
 def test_import_surface() -> None:
     import qintent
 

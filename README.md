@@ -62,6 +62,30 @@ print(compiled["compiled_summary"])
 
 QIntent uses Python-inspired syntax for ergonomics, but its semantics are QDSV-native: computational intent, state spaces, predicates, ranking, sampling, evidence, and backend-independent execution.
 
+## QIntent Explain
+
+`client.explain(...)` returns a **Semantic Execution Passport**. It shows how QDSV understands the declared intent before execution: intent type, state space, predicate shape, selected execution path, circuit materialization requirements, backend options, and evidence digests.
+
+```python
+passport = client.explain(
+    'find_rows("candidate_index").where("score", ">=", 850).rank_by("score").top_k(5)',
+    rows=rows,
+)
+
+plan = passport["semantic_execution_passport"]["execution_plan"]
+print(plan["selected_backend"])
+print(plan["uses_circuits"])
+print(plan["reason"])
+```
+
+For the public preview, the default narrative is:
+
+```text
+QIntent -> QDSV -> QuEST/statevector -> no user-written circuits
+```
+
+QuEST is the highlighted public route because it can represent the declared state-space intent without forcing users to start from circuits. Aer and IBM-style hardware paths require circuit materialization when those backends are enabled. IBM/hardware execution is available through Qruba/full platform configurations, not the default public SDK preview.
+
 ## How QIntent Differs
 
 QIntent works from the intention and formulation of the problem: users declare the search, condition, ranking, decision, verification, or state-space relationship they need, and QDSV decides how to represent and execute it. Circuits are not the starting point; they are only a possible materialization when a backend requires them.
@@ -96,9 +120,35 @@ Supported preview patterns include:
 - `field(variable, column)` and `row["column"]`
 - `not`, `in`, `not in`, chained comparisons
 - `all([...])`, `any([...])`
-- `abs(...)`, `round(...)`, `min(...)`, `max(...)`, `clip(...)`
+- `abs(...)`, `round(...)`, `floor(...)`, `ceil(...)`, `sign(...)`, `min(...)`, `max(...)`, `clip(...)`
+- `between(...)`, `outside(...)`, `abs_diff(...)`, `squared_diff(...)`, `within_tolerance(...)`
+- `safe_div(...)`, `ratio(...)`, `percent(...)`
+- `is_null(...)`, `not_null(...)`, `coalesce(...)`, `default_if_invalid(...)`
+- `sum_fields([...])`, `mean_fields([...])`, `weighted_sum([...], [...])`
 
 See [grammar/QINTENT_PREVIEW.md](grammar/QINTENT_PREVIEW.md) for the public preview grammar notes.
+
+## Basic QDSV Operations
+
+QIntent now exposes a controlled set of basic QDSV operations that can be used inside predicates, ranking objectives, and state-space expressions. They are not arbitrary Python functions; they are QDSV primitives designed to remain bounded, auditable, and backend-aware.
+
+```python
+source = """
+i = domain(0, 9)
+amount_gap = abs_diff(field(i, "amount_a"), field(i, "amount_b"))
+quality = coalesce(field(i, "quality"), 0)
+score = weighted_sum([quality, max(0, 1000 - amount_gap)], [0.6, 0.4])
+find(i).where(
+    within_tolerance(field(i, "amount_a"), field(i, "amount_b"), 5)
+    and between(score, 700, 1000)
+).rank_by(score).top_k(5)
+"""
+
+passport = client.explain(source, rows=rows)
+print(passport["semantic_execution_passport"]["execution_plan"])
+```
+
+These helpers make it easier to express matching, tolerance, safe division, null handling, bounded scores, and row-level signal aggregation without exposing the internal QDSV decision formula.
 
 ## Decision Model Operation
 
@@ -155,6 +205,7 @@ client.spec()
 client.examples()
 client.validate(source, rows=None, backend="quest")
 client.compile(source, rows=None, backend="quest")
+client.explain(source, rows=None, backend="quest")
 client.run(source, rows=None, backend="quest")
 ```
 
@@ -241,6 +292,7 @@ client = QIntentClient()
 qintent spec
 qintent examples
 qintent compile 'x = domain(0, 15); find(x).where(x in [3, 6, 9])'
+qintent explain 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv
 qintent run 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv
 ```
 

@@ -152,6 +152,23 @@ class QIntentClient:
             json=self._payload(source, rows=rows, backend=backend, backend_mode=backend_mode, shots=shots),
         )
 
+    def explain(
+        self,
+        source: str,
+        *,
+        rows: Sequence[Mapping[str, Any]] | None = None,
+        backend: str = "quest",
+        backend_mode: str | None = None,
+        shots: int = 256,
+    ) -> dict[str, Any]:
+        """Return a Semantic Execution Passport for the declared QIntent source."""
+
+        return self._request(
+            "POST",
+            "/qintent/explain",
+            json=self._payload(source, rows=rows, backend=backend, backend_mode=backend_mode, shots=shots),
+        )
+
     def run(
         self,
         source: str,
