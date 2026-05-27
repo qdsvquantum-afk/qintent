@@ -1,7 +1,7 @@
 from qintent import QIntentClient
 
 
-client = QIntentClient.local()
+client = QIntentClient()
 
 rows = [
     {"candidate_index": 0, "score": 720, "risk_ok": True},
