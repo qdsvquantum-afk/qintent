@@ -14,7 +14,32 @@ find_rows("candidate_index").where_between("amount", 1000, 5000)
 find_rows("candidate_index").where_all(["risk_ok", "income_ok"])
 find_rows("candidate_index").where_any(["risk_ok", "manual_review_ok"])
 find_rows("candidate_index").rank_by("score").top_k(10)
+find_rows("candidate_index").using_decision_model([...]).accept_if(threshold=850).rank().top_k(10)
 ```
+
+### Decision model
+
+`using_decision_model(...)` declares a prebuilt QDSV decision operation over prepared criteria without exposing the internal formula.
+
+```python
+find_rows("candidate_index")
+  .using_decision_model([
+      criterion("credit_score_norm", importance=25, priority=1),
+      criterion("default_score", importance=25, priority=1),
+      criterion("debt_burden_score", importance=20, priority=1),
+  ])
+  .accept_if(threshold=850)
+  .rank()
+  .top_k(10)
+```
+
+Each `criterion(...)` uses:
+
+- `field`: prepared signal column.
+- `importance`: semantic influence of the criterion.
+- `priority`: optional priority modifier, defaulting to `1`.
+
+QDSV maps the criteria internally into a state-space representation for selection, ranking, confidence, and evidence. The internal formula is not part of the public QIntent grammar.
 
 ## Domain search
 

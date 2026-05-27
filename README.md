@@ -91,6 +91,7 @@ Supported preview patterns include:
 - `find_rows(...).where_all(...)`
 - `find_rows(...).where_any(...)`
 - `find_rows(...).rank_by(...).top_k(...)`
+- `find_rows(...).using_decision_model([...]).accept_if(...).rank().top_k(...)`
 - `domain(...), range(...), find(...).where(...)`
 - `field(variable, column)` and `row["column"]`
 - `not`, `in`, `not in`, chained comparisons
@@ -98,6 +99,54 @@ Supported preview patterns include:
 - `abs(...)`, `round(...)`, `min(...)`, `max(...)`, `clip(...)`
 
 See [grammar/QINTENT_PREVIEW.md](grammar/QINTENT_PREVIEW.md) for the public preview grammar notes.
+
+## Decision Model Operation
+
+QIntent can express a prebuilt QDSV decision model without exposing the internal formula. Users declare criteria, importance, priority, an acceptance rule, and the desired ranking behavior. Each criterion can represent almost any meaningful prepared signal: risk, confidence, stability, similarity, energy, quality, eligibility, anomaly, or evidence.
+
+QDSV maps those declared criteria internally into a state-space representation for selection, ranking, confidence, and evidence. The internal formula is not exposed by QIntent.
+
+```python
+rows = [
+    {
+        "candidate_index": 0,
+        "credit_score_norm": 780,
+        "default_score": 1000,
+        "debt_burden_score": 900,
+    },
+    {
+        "candidate_index": 1,
+        "credit_score_norm": 700,
+        "default_score": 700,
+        "debt_burden_score": 700,
+    },
+    {
+        "candidate_index": 2,
+        "credit_score_norm": 950,
+        "default_score": 1000,
+        "debt_burden_score": 980,
+    },
+]
+
+source = """
+find_rows("candidate_index")
+  .using_decision_model([
+      criterion("credit_score_norm", importance=25, priority=1),
+      criterion("default_score", importance=25, priority=1),
+      criterion("debt_burden_score", importance=20, priority=1),
+  ])
+  .accept_if(threshold=850)
+  .rank()
+  .top_k(10)
+"""
+
+result = client.run(source, rows=rows)
+
+print(result["status"])
+print(result["result"]["selected_rows"])
+```
+
+Use this operation when a problem is better represented as a multi-signal decision rather than a single `where(...)` threshold. The public API keeps the operation declarative: criteria are visible, but QDSV's internal representation remains part of the private runtime.
 
 ## Methods
 
