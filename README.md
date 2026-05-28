@@ -302,9 +302,12 @@ The public preview intentionally exposes a stable subset. Advanced QDSV families
 
 Write QIntent locally. Execute on QDSV.
 
-## Links
+## Live Access
+
+These web experiences are currently in Developer Preview. Interfaces, copy, and visual design may evolve while the QIntent SDK and QDSV execution model continue to stabilize.
 
 - QDSV landing: https://qdsv.cloud
 - QIntent site: https://qintent.qdsv.cloud
+- Qruba Cloud Platform: https://cloud.qruba.site/
 - Public API spec: https://api.qdsv.cloud/api/qintent/spec
 - PyPI: https://pypi.org/project/qdsv-qintent/
