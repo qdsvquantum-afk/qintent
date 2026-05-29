@@ -13,6 +13,7 @@ This repository is the public Developer Preview for QIntent.
 - Documentation for using QIntent through the QDSV public API
 - QIntent Explain / Semantic Execution Passport
 - Controlled QDSV helpers for comparison, logic, ranges, tolerance, safe division, null handling, numeric bounds, and row-level signal aggregation
+- Decision-model declarations over prepared `vi` signals through `using_decision_model(...)`
 
 ## Not included
 
@@ -34,6 +35,8 @@ The following components are not part of this repository:
 QIntent is the public language and SDK layer. QDSV is the underlying semantic computation model and runtime. Qruba is the commercial platform built on top of QDSV.
 
 QIntent is not a circuit-authoring language. It is a quantum-intent language. QDSV can execute a problem without circuits through semantic/statevector routes when available, and can materialize circuits only when the selected backend requires them.
+
+The public decision-model syntax is also intent-first. Users declare prepared `vi` signals, importance, priority, an acceptance rule, and ranking behavior. QDSV maps those signals internally into selection, ranking, confidence, and evidence without exposing the private decision formula.
 
 The intended product architecture is:
 
