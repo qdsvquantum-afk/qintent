@@ -2,9 +2,15 @@
 
 This document describes the stable public preview subset exposed by the `qdsv-qintent` SDK.
 
-QIntent is a declarative quantum-intent language for expressing computational intent over state spaces, predicates, rows, ranking, and sampling.
+QIntent is a declarative quantum-intent language for expressing computational intent over state spaces, operations, predicates, relations, transformations, rows, ranking, sampling, and evidence.
 
-The syntax is Python-inspired for developer ergonomics. The semantics are QDSV-native: state spaces, predicates, ranking, sampling, evidence, and backend-independent execution intent.
+The syntax is Python-inspired for developer ergonomics. The semantics are QDSV-native: state spaces, operations, predicates, relations, transformations, ranking, sampling, evidence, and backend-independent execution intent.
+
+## Semantic scope
+
+The public preview exposes a safe subset first. Row selection, ranking and `using_decision_model(...)` are supported operations, not the full ceiling of the QDSV model.
+
+At the model level, QDSV is designed to represent computable semantics as operations, predicates, relations, transformations, observations, distributions, constraints, and evidence over state spaces. Circuit materialization is a backend-dependent representation, not the starting point of the language.
 
 ## Row selection
 
@@ -21,7 +27,7 @@ find_rows("candidate_index").using_decision_model([...]).accept_if(threshold=850
 
 `using_decision_model(...)` declares a prebuilt QDSV decision operation over prepared criteria without exposing the internal formula.
 
-Each criterion is a prepared value: a comparable, oriented value that represents something meaningful about the process. This lets QIntent represent different domains without hard-coding those domains into the language.
+Each criterion is a prepared value: a comparable, oriented value that represents something meaningful about the process. This lets the prebuilt decision operation work across different domains without hard-coding those domains into the language.
 
 ```python
 find_rows("candidate_index")

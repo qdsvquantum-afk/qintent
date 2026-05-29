@@ -2,9 +2,9 @@
 
 Lightweight Python SDK for **QIntent**, the native intent-first quantum language powered by **QDSV**.
 
-QIntent lets users declare what they want to find, evaluate, rank, sample, or verify over state spaces, predicates, rows, and evidence. QDSV then decides how to represent and execute that intent.
+QIntent lets users declare computational intent over state spaces, operations, predicates, relations, transformations, observations, distributions, rows, and evidence. QDSV then decides how to represent and execute that intent.
 
-QIntent is designed for quantum-oriented semantic computation: users describe the problem intent and the meaningful states, candidates, constraints, and evidence; QDSV decides how that intent is compiled, routed, and executed by statevector, simulator, or quantum-capable backends.
+QIntent is designed for quantum-oriented semantic computation: users describe the problem intent and the meaningful states, operations, relationships, constraints, and evidence; QDSV decides how that intent is compiled, routed, and executed by semantic/statevector, simulator, or quantum-capable backends.
 
 Not starting from circuits is a consequence of the model, not the main idea. QIntent starts from computational intent. QDSV may execute that intent directly through semantic/statevector routes when possible, and only materializes circuits when a selected backend requires that representation. The public SDK defaults to the QDSV QuEST route because it is designed to execute QIntent over state spaces from the declared intent.
 
@@ -24,6 +24,24 @@ This repository is intentionally open-core:
 QIntent SDKs and examples are released under the MIT License. QDSV Runtime, backend execution, optimization layers, quantum adapters, and internal orchestration components are not included in this repository and remain proprietary/private unless explicitly released under a separate license.
 
 QDSV, QIntent, and Qruba names and marks are project marks of their respective owners. The MIT License for this repository does not grant trademark rights.
+
+## Representation Scope
+
+QIntent is not just a scoring or row-filtering interface. Those are preview operations exposed through the public SDK, but they do not define the ceiling of the QDSV model.
+
+The QDSV model is designed to represent a broad class of computable semantics: operations, predicates, relations, transformations, searches, observations, rankings, distributions, constraints, and evidence over state spaces.
+
+In practical terms:
+
+```text
+problem intent
+-> semantic representation
+-> state space / operation / predicate / relation
+-> execution route
+-> evidence
+```
+
+`using_decision_model(...)` is one prebuilt operation inside this wider semantic space. The public SDK exposes a safe subset first; the private QDSV Runtime and Qruba platform contain broader orchestration, backend policy, and materialization layers.
 
 ## Quick Start
 
@@ -60,7 +78,7 @@ compiled = client.compile(source)
 print(compiled["compiled_summary"])
 ```
 
-QIntent uses Python-inspired syntax for ergonomics, but its semantics are QDSV-native: computational intent, state spaces, predicates, ranking, sampling, evidence, and backend-independent execution.
+QIntent uses Python-inspired syntax for ergonomics, but its semantics are QDSV-native: computational intent, state spaces, operations, predicates, relations, transformations, ranking, sampling, evidence, and backend-independent execution.
 
 ## QIntent Explain
 
@@ -88,25 +106,25 @@ QuEST is the highlighted public route because it can represent the declared stat
 
 ## How QIntent Differs
 
-QIntent works from the intention and formulation of the problem: users declare the search, condition, ranking, decision, verification, or state-space relationship they need, and QDSV decides how to represent and execute it. Circuits are not the starting point; they are only a possible materialization when a backend requires them.
+QIntent works from the intention and formulation of the problem: users declare the operation, predicate, relation, search, observation, ranking, decision, verification, or state-space relationship they need, and QDSV decides how to represent and execute it. Circuits are not the starting point; they are only a possible materialization when a backend requires them.
 
 Traditional quantum frameworks often ask users to translate the problem into an algorithm or circuit first. QIntent takes a different path: users declare the problem intent, and QDSV determines the representation and execution route.
 
 This aligns naturally with the way quantum systems are reasoned about:
 
 - Quantum physics works with states, superposition, amplitudes, probability, observation, distributions, and measurement.
-- QIntent/QDSV starts from state spaces, conditions over states, solution mass, ranking, probability, and evidence.
+- QIntent/QDSV starts from state spaces, operations over states, predicates, relations, solution mass, ranking, probability, distribution, observation, and evidence.
 - Circuits remain valid, but they are an operational way to materialize execution, not necessarily the natural language of the problem.
 
 | Language / layer | What it tries to be | How QIntent is different | User benefit |
 |---|---|---|---|
-| Classiq Qmod | A high-level model for designing quantum algorithms and synthesizing circuits. | Qmod abstracts circuit creation. QIntent starts from the problem intent and only materializes circuits if the backend requires them. | Users can formulate search, ranking, or decision problems without starting by designing circuits. |
-| Q# | A formal language for programming quantum and hybrid quantum-classical algorithms. | Q# is still quantum programming. QIntent is intent declaration over state spaces. | Reduces the need to know detailed quantum programming in order to express executable problems. |
+| Classiq Qmod | A high-level model for designing quantum algorithms and synthesizing circuits. | Qmod abstracts circuit creation. QIntent starts from semantic problem intent and only materializes circuits if the backend requires them. | Users can formulate operations, predicates, relations, searches, rankings, or decisions without starting by designing circuits. |
+| Q# | A formal language for programming quantum and hybrid quantum-classical algorithms. | Q# is still quantum programming. QIntent is semantic intent declaration over state spaces and operations. | Reduces the need to know detailed quantum programming in order to express executable problems. |
 | QIR | An intermediate representation for connecting languages and backends. | QIR is not designed for end users. QIntent is a declarative interface usable by people and SDKs. | Users write readable intent and QDSV decides the execution route. |
-| OpenQASM 3 | A language for describing circuits, operations, and hardware-near control. | OpenQASM describes how to execute quantum operations. QIntent describes what condition, search, or decision should be resolved. | Avoids forcing users to write gates, measurements, and low-level control from the start. |
-| Qiskit / Cirq / QPanda | Frameworks for building, simulating, and executing quantum circuits or algorithms. | They are powerful tools, but circuit/program-first. QIntent is intent/state-space-first. | Brings data, decision, or search problems to QDSV, QuEST, Aer, or hardware execution without manually redesigning them as circuits. |
-| QiliSDK | A Python framework for digital, analog, and hybrid quantum algorithms, including circuit-based and Hamiltonian-based workflows across multiple backends. | QiliSDK lets users design quantum algorithms through circuits, Hamiltonians, schedules, or hybrid workflows. QIntent starts from the problem intention over state spaces and lets QDSV decide whether semantic/statevector execution or circuit materialization is needed. | Users can express search, ranking, decision, or selection problems without first translating them into a quantum circuit or Hamiltonian, while still allowing backend-specific materialization when required. |
-| PennyLane | A framework for QML, differentiation, and hybrid optimization. | PennyLane is strong for trainable models and QML. QIntent is more general for predicates, scoring, ranking, search, and selection. | Useful when users do not want to train a QML model, but evaluate candidates or conditions with evidence. |
+| OpenQASM 3 | A language for describing circuits, operations, and hardware-near control. | OpenQASM describes how to execute quantum operations. QIntent describes what semantic operation, condition, relation, search, or decision should be resolved. | Avoids forcing users to write gates, measurements, and low-level control from the start. |
+| Qiskit / Cirq / QPanda | Frameworks for building, simulating, and executing quantum circuits or algorithms. | They are powerful tools, but circuit/program-first. QIntent is intent/state-space-first. | Brings operations, data relationships, predicates, decisions, or searches to QDSV, QuEST, Aer, or hardware execution without manually redesigning them as circuits. |
+| QiliSDK | A Python framework for digital, analog, and hybrid quantum algorithms, including circuit-based and Hamiltonian-based workflows across multiple backends. | QiliSDK lets users design quantum algorithms through circuits, Hamiltonians, schedules, or hybrid workflows. QIntent starts from semantic problem intent over state spaces and lets QDSV decide whether semantic/statevector execution or circuit materialization is needed. | Users can express operations, predicates, relationships, searches, rankings, or decisions without first translating them into a quantum circuit or Hamiltonian, while still allowing backend-specific materialization when required. |
+| PennyLane | A framework for QML, differentiation, and hybrid optimization. | PennyLane is strong for trainable models and QML. QIntent is broader for semantic operations, predicates, relations, scoring, ranking, search, and evidence. | Useful when users do not want to train a QML model, but represent and execute a semantic problem with evidence. |
 | Silq / Qrisp | High-level languages to make quantum programming more comfortable. | They simplify quantum programming. QIntent tries to avoid programming when the problem can be expressed semantically. | Lowers the entry barrier: users declare the problem and QDSV decides how to execute it. |
 
 Supported preview patterns include:
@@ -157,7 +175,7 @@ QIntent can express a prebuilt QDSV decision model without exposing the internal
 
 Each criterion is a prepared value: a comparable, oriented value that represents something meaningful about a process.
 
-The key idea is that QIntent does not need the domain to be hard-coded. If a process can be converted into meaningful prepared values, the decision model can represent it as ranking, prioritization, selection, or evidence.
+The key idea is that QIntent does not need the domain to be hard-coded. If a process can be converted into meaningful prepared values, this prebuilt decision operation can represent it as ranking, prioritization, selection, or evidence.
 
 QDSV maps those declared criteria internally into a state-space representation for selection, ranking, confidence, and evidence. The internal formula is not exposed by QIntent.
 
