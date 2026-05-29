@@ -155,9 +155,9 @@ These helpers make it easier to express matching, tolerance, safe division, null
 
 QIntent can express a prebuilt QDSV decision model without exposing the internal formula. Users declare criteria, importance, priority, an acceptance rule, and the desired ranking behavior.
 
-Each criterion is a prepared **vi signal**: a comparable, oriented value that represents something meaningful about a process. A vi can represent risk, confidence, stability, similarity, urgency, customer value, debt burden, quality, eligibility, anomaly, network state, maintenance state, scientific feasibility, or evidence.
+Each criterion is a prepared value: a comparable, oriented value that represents something meaningful about a process.
 
-The key idea is that QIntent does not need the domain to be hard-coded. If a business, scientific, telecom, financial, or operational process can be converted into meaningful vi signals, the decision model can represent it as ranking, prioritization, selection, or evidence.
+The key idea is that QIntent does not need the domain to be hard-coded. If a process can be converted into meaningful prepared values, the decision model can represent it as ranking, prioritization, selection, or evidence.
 
 QDSV maps those declared criteria internally into a state-space representation for selection, ranking, confidence, and evidence. The internal formula is not exposed by QIntent.
 
@@ -203,17 +203,7 @@ print(result["result"]["selected_rows"])
 
 Use this operation when a problem is better represented as a multi-signal decision rather than a single `where(...)` threshold. The public API keeps the operation declarative: criteria are visible, but QDSV's internal representation remains part of the private runtime.
 
-Example process mappings:
-
-| Process | Possible vi signals |
-|---|---|
-| Claims / customer pain | severity, recurrence, SLA risk, impact, customer value |
-| Reconciliation | amount difference, date difference, reference similarity, counterparty confidence |
-| Case prioritization | criticality, urgency, debt, recurrence, impact |
-| Churn risk | usage drop, recent complaints, payment behavior, tenure, segment |
-| Fraud / anomalies | deviation, frequency, commercial pattern, accumulated risk |
-| Predictive maintenance | equipment criticality, failure history, area, operational impact |
-| Network / traffic / spectrum | congestion, latency, availability, demand, priority |
+Use prepared values when the raw data has already been converted into a clear scale and direction. For example: higher means better, or higher means more relevant for selection.
 
 ## Methods
 

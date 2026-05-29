@@ -21,7 +21,7 @@ find_rows("candidate_index").using_decision_model([...]).accept_if(threshold=850
 
 `using_decision_model(...)` declares a prebuilt QDSV decision operation over prepared criteria without exposing the internal formula.
 
-Each criterion is a prepared **vi signal**: a comparable, oriented value that represents something meaningful about the process, such as risk, urgency, similarity, quality, customer value, maintenance state, network state, anomaly, confidence or evidence. This lets QIntent represent different domains without hard-coding those domains into the language.
+Each criterion is a prepared value: a comparable, oriented value that represents something meaningful about the process. This lets QIntent represent different domains without hard-coding those domains into the language.
 
 ```python
 find_rows("candidate_index")
@@ -43,7 +43,7 @@ Each `criterion(...)` uses:
 
 QDSV maps the criteria internally into a state-space representation for selection, ranking, confidence, and evidence. The internal formula is not part of the public QIntent grammar.
 
-Typical vi mappings include claims, reconciliation, case prioritization, churn, fraud, maintenance, network traffic, scientific candidate screening, and other processes where raw data can be prepared as comparable signals.
+Typical mappings start from raw data and convert it into comparable prepared values before QIntent evaluates or ranks candidates.
 
 ## Domain search
 

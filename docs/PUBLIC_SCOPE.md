@@ -13,7 +13,7 @@ This repository is the public Developer Preview for QIntent.
 - Documentation for using QIntent through the QDSV public API
 - QIntent Explain / Semantic Execution Passport
 - Controlled QDSV helpers for comparison, logic, ranges, tolerance, safe division, null handling, numeric bounds, and row-level signal aggregation
-- Decision-model declarations over prepared `vi` signals through `using_decision_model(...)`
+- Decision-model declarations over prepared values through `using_decision_model(...)`
 
 ## Not included
 
@@ -36,7 +36,7 @@ QIntent is the public language and SDK layer. QDSV is the underlying semantic co
 
 QIntent is not a circuit-authoring language. It is a quantum-intent language. QDSV can execute a problem without circuits through semantic/statevector routes when available, and can materialize circuits only when the selected backend requires them.
 
-The public decision-model syntax is also intent-first. Users declare prepared `vi` signals, importance, priority, an acceptance rule, and ranking behavior. QDSV maps those signals internally into selection, ranking, confidence, and evidence without exposing the private decision formula.
+The public decision-model syntax is also intent-first. Users declare prepared values, importance, priority, an acceptance rule, and ranking behavior. QDSV maps those values internally into selection, ranking, confidence, and evidence without exposing the private decision formula.
 
 The intended product architecture is:
 
