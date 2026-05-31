@@ -65,6 +65,31 @@ print(result["status"])
 print(result["result"]["selected_rows"])
 ```
 
+## Decision and Reliability Columns
+
+QIntent/QDSV separates the decision layer from backend evidence so results are not misread.
+
+Tabular executions may include:
+
+- `qdsv_selected_semantic`: decision produced by the declared QIntent/QDSV semantics.
+- `qdsv_selected_hardware`: hardware-reconstructed decision when per-candidate hardware evidence exists; otherwise `null`.
+- `qruba_reliability_status`: `accepted`, `uncertain`, `rejected`, `reported`, or `not_available`.
+- `qruba_accepted_as_reliable`: `true`, `false`, or `null` when reliability was not enforced.
+- `qruba_final_decision`: decision recommended by the platform for that row.
+- `qdsv_selected_final_decision`: generic final decision column used by the public SDK/API preview.
+- `qdsv_selected_decision_source`: whether the final decision came from semantic execution, hardware evidence, or reliability policy.
+
+For the public SDK preview, most executions are semantic/statevector or simulator routes, so `qdsv_selected_hardware` is usually `null`. In full Qruba hardware workflows, hardware evidence can be reported separately from the semantic decision.
+
+In the Qruba visual platform, nodes can also generate output-specific names based on the configured output column:
+
+- `<output_column>_semantic`
+- `<output_column>_hardware`
+- `<output_column>_final_decision`
+- `<output_column>_decision_source`
+
+This separation is important when comparing semantic results with real quantum hardware. A high semantic accuracy does not automatically mean that the hardware distribution reproduced the same decision with high reliability. QDSV keeps both layers visible so users can audit what was selected by the model, what was reconstructed from hardware evidence, and what the platform recommends as the final row-level decision.
+
 ## QIntent Syntax
 
 ```python
@@ -141,6 +166,7 @@ Supported preview patterns include:
 - `all([...])`, `any([...])`
 - `abs(...)`, `round(...)`, `floor(...)`, `ceil(...)`, `sign(...)`, `min(...)`, `max(...)`, `clip(...)`
 - `between(...)`, `outside(...)`, `abs_diff(...)`, `squared_diff(...)`, `within_tolerance(...)`
+- `similarity(...)`, `within_similarity(...)`
 - `safe_div(...)`, `ratio(...)`, `percent(...)`
 - `is_null(...)`, `not_null(...)`, `coalesce(...)`, `default_if_invalid(...)`
 - `sum_fields([...])`, `mean_fields([...])`, `weighted_sum([...], [...])`
@@ -168,6 +194,39 @@ print(passport["semantic_execution_passport"]["execution_plan"])
 ```
 
 These helpers make it easier to express matching, tolerance, safe division, null handling, bounded scores, and row-level signal aggregation without exposing the internal QDSV decision formula.
+
+### Semantic Similarity
+
+`similarity(...)` is exposed as a QDSV semantic relation helper. It returns a prepared 0..1000 signal that can feed predicates, ranking objectives, or the prebuilt Decision Model operation.
+
+For prepared numeric vectors, QIntent also exposes `vector_similarity(...)`. It returns a 0..1000 normalized-overlap / fidelity score, which is the semantic bridge toward kernel, overlap, or state-similarity style representations.
+
+```python
+source = """
+i = domain(0, 9)
+sim = similarity(field(i, "reference_a"), field(i, "reference_b"))
+find(i).where(sim >= 850).rank_by(sim).top_k(10)
+"""
+
+passport = client.explain(source, rows=rows)
+print(passport["semantic_execution_passport"]["predicate"])
+```
+
+In the public preview, this does not claim automatic semantic embedding or production-grade record linkage. It is a bounded, auditable QDSV operation for representing similarity as part of the problem intent. On the QuEST route, it can be represented through semantic/statevector execution without user-written circuits. On Aer or IBM-style paths, circuit materialization only appears when the selected backend requires and supports that route.
+
+Vector overlap example:
+
+```python
+source = """
+i = domain(0, 9)
+left_state = [field(i, "a1"), field(i, "a2"), field(i, "a3")]
+right_state = [field(i, "b1"), field(i, "b2"), field(i, "b3")]
+overlap = vector_similarity(left_state, right_state)
+find(i).where(overlap >= 850).rank_by(overlap).top_k(10)
+"""
+```
+
+The vector form expects equal-length numeric vectors with comparable meaning. QDSV treats the result as a semantic state relation that can participate in predicates, ranking, evidence and backend execution planning.
 
 ## Decision Model Operation
 
