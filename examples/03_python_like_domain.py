@@ -1,7 +1,9 @@
+import os
+
 from qintent import QIntentClient
 
 
-client = QIntentClient()
+client = QIntentClient(api_key=os.getenv("QINTENT_API_KEY") or "YOUR_QDSV_API_KEY")
 
 source = """
 x = domain(0, 15)

@@ -1,7 +1,9 @@
+import os
+
 from qintent import QIntentClient
 
 
-client = QIntentClient()
+client = QIntentClient(api_key=os.getenv("QINTENT_API_KEY") or "YOUR_QDSV_API_KEY")
 
 rows = [
     {"candidate_index": 0, "credit_score_norm": 780, "default_score": 1000, "debt_burden_score": 900},

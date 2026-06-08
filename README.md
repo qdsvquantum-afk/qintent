@@ -32,7 +32,7 @@ Run a first intent:
 ```python
 from qintent import QIntentClient
 
-client = QIntentClient()
+client = QIntentClient(api_key="YOUR_QDSV_API_KEY")
 
 rows = [
     {"candidate_index": 0, "score": 720, "risk_ok": True},
@@ -126,7 +126,7 @@ Users declare criteria, importance, priority, an acceptance rule and ranking beh
 ```python
 from qintent import QIntentClient
 
-client = QIntentClient()
+client = QIntentClient(api_key="YOUR_QDSV_API_KEY")
 
 rows = [
     {"candidate_index": 0, "credit_score_norm": 780, "default_score": 1000, "debt_burden_score": 900},
@@ -199,13 +199,13 @@ client.run(source, backend="aer")   # when supported by the deployment
 
 ## Public API And Access
 
-The public preview can be used without a user key for small examples:
+Public informational endpoints such as `spec()` and `examples()` can be opened without a key. Value-producing API calls such as `validate`, `compile`, `explain` and `run` require an SDK API key:
 
 ```python
-client = QIntentClient()
+client = QIntentClient(api_key="YOUR_QDSV_API_KEY")
 ```
 
-The SDK can also send credentials when your Qruba/QDSV deployment or license requires them:
+The SDK can also send a Qruba/QDSV license key when your deployment requires it, but SDK cloud quotas are controlled by API key:
 
 ```python
 client = QIntentClient(api_key="...", license_key="...")
@@ -218,6 +218,12 @@ QINTENT_API_URL=https://api.qdsv.cloud/api
 QINTENT_API_KEY=...
 QDSV_LICENSE_KEY=...
 ```
+
+Initial public SDK quota:
+
+- QIntent value requests: 100/month per API key.
+- QIntent rows: deployment-controlled, default 200 rows/request.
+- Hardware execution: not available from public SDK preview.
 
 Private Docker/local execution is available only when a private QDSV node is online:
 
@@ -233,9 +239,9 @@ If the private node is unavailable, it may be offline, reserved for private proc
 ```bash
 qintent spec
 qintent examples
-qintent compile 'x = domain(0, 15); find(x).where(x in [3, 6, 9])'
-qintent explain 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv
-qintent run 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv
+qintent compile 'x = domain(0, 15); find(x).where(x in [3, 6, 9])' --api-key YOUR_QDSV_API_KEY
+qintent explain 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv --api-key YOUR_QDSV_API_KEY
+qintent run 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv --api-key YOUR_QDSV_API_KEY
 ```
 
 ## Examples And Notebooks

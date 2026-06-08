@@ -11,6 +11,7 @@ from .exceptions import QIntentAPIError, QIntentHTTPError
 
 
 DEFAULT_API_URL = "https://api.qdsv.cloud/api"
+SDK_VERSION = "0.1.10"
 PRIVATE_NODE_UNAVAILABLE_MESSAGE = (
     "Private QDSV node temporarily unavailable. It may be offline, reserved for "
     "private processing, or busy. Try again later or use QIntentClient() for "
@@ -67,8 +68,10 @@ class QIntentClient:
         headers = {
             "Content-Type": "application/json",
             "x-sdk-name": self.sdk_name,
+            "x-sdk-version": SDK_VERSION,
         }
         if self.api_key:
+            headers["x-api-key"] = self.api_key
             headers["Authorization"] = f"Bearer {self.api_key}"
         if self.license_key:
             headers["x-license-key"] = self.license_key

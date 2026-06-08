@@ -65,6 +65,30 @@ def test_explain_calls_public_explain_endpoint(monkeypatch: pytest.MonkeyPatch) 
     assert calls["kwargs"]["json"]["rows"] == [{"candidate_index": 0, "score": 900}]
 
 
+def test_api_key_is_sent_as_header_and_bearer(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = {}
+
+    class FakeResponse:
+        ok = True
+        status_code = 200
+
+        @staticmethod
+        def json():
+            return {"status": "SUCCESS"}
+
+    def fake_request(method, url, **kwargs):
+        calls["kwargs"] = kwargs
+        return FakeResponse()
+
+    monkeypatch.setattr("qintent.client.requests.request", fake_request)
+
+    QIntentClient(api_key="qdsvi_demo_key").spec()
+
+    headers = calls["kwargs"]["headers"]
+    assert headers["x-api-key"] == "qdsvi_demo_key"
+    assert headers["Authorization"] == "Bearer qdsvi_demo_key"
+
+
 def test_import_surface() -> None:
     import qintent
 
