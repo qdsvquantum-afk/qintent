@@ -14,6 +14,7 @@ This repository is the public Developer Preview for QIntent.
 - QIntent Explain / Semantic Execution Passport
 - Controlled QDSV helpers for comparison, logic, ranges, tolerance, safe division, null handling, numeric bounds, and row-level signal aggregation
 - Decision-model declarations over prepared values through `using_decision_model(...)`
+- Semantic-score declarations over prepared signals through `using_semantic_score(...)`
 - Documentation of QIntent's semantic scope: operations, predicates, relations, transformations, state spaces, distributions, and evidence
 
 ## Not included
@@ -40,6 +41,8 @@ QIntent is not a circuit-authoring language. It is a quantum-intent language. QD
 The public preview intentionally exposes a bounded subset first. This should not be read as the ceiling of the QDSV model. At the model level, QDSV is designed to represent computable semantics as operations, predicates, relations, transformations, observations, distributions, constraints, and evidence over state spaces.
 
 The public decision-model syntax is one prebuilt operation inside that wider semantic space. Users declare prepared values, importance, priority, an acceptance rule, and ranking behavior. QDSV maps those values internally into selection, ranking, confidence, and evidence without exposing the private decision formula.
+
+The public semantic-score syntax is an advanced preview operation over prepared signals. Users declare signal names, influence, priority, and an optional risk adjustment. QDSV maps those declarations internally into controlled scoring, ranking and evidence outputs without exposing the private scoring formula.
 
 The intended product architecture is:
 

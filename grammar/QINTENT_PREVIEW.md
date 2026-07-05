@@ -8,7 +8,7 @@ The syntax is Python-inspired for developer ergonomics. The semantics are QDSV-n
 
 ## Semantic scope
 
-The public preview exposes a safe subset first. Row selection, ranking and `using_decision_model(...)` are supported operations, not the full ceiling of the QDSV model.
+The public preview exposes a safe subset first. Row selection, ranking, `using_decision_model(...)` and `using_semantic_score(...)` are supported operations, not the full ceiling of the QDSV model.
 
 At the model level, QDSV is designed to represent computable semantics as operations, predicates, relations, transformations, observations, distributions, constraints, and evidence over state spaces. Circuit materialization is a backend-dependent representation, not the starting point of the language.
 
@@ -21,6 +21,7 @@ find_rows("candidate_index").where_all(["risk_ok", "income_ok"])
 find_rows("candidate_index").where_any(["risk_ok", "manual_review_ok"])
 find_rows("candidate_index").rank_by("score").top_k(10)
 find_rows("candidate_index").using_decision_model([...]).accept_if(threshold=850).rank().top_k(10)
+find_rows("candidate_index").using_semantic_score([...], risk_adjustment="risk").accept_if(threshold=850).rank().top_k(10)
 ```
 
 ### Decision model
@@ -50,6 +51,34 @@ Each `criterion(...)` uses:
 QDSV maps the criteria internally into a state-space representation for selection, ranking, confidence, and evidence. The internal formula is not part of the public QIntent grammar.
 
 Typical mappings start from raw data and convert it into comparable prepared values before QIntent evaluates or ranks candidates.
+
+### Semantic score
+
+`using_semantic_score(...)` declares an advanced QDSV semantic scoring operation over prepared signals without exposing the internal formula.
+
+Use it when each candidate already has comparable evidence fields, operational influence, priority, and an optional prepared risk adjustment.
+
+```python
+find_rows("candidate_index")
+  .using_semantic_score([
+      signal("syndrome_support", influence=30, priority=2),
+      signal("logical_preservation", influence=30, priority=3),
+      signal("decoder_confidence", influence=20, priority=1),
+      signal("propagation_safety", influence=10, priority=2),
+      signal("distance_safety", influence=10, priority=3),
+  ], risk_adjustment="logical_risk")
+  .accept_if(threshold=780)
+  .rank()
+  .top_k(5)
+```
+
+Each `signal(...)` uses:
+
+- `field`: prepared signal column.
+- `influence`: operational influence of the signal.
+- `priority`: optional priority modifier, defaulting to `1`.
+
+`risk_adjustment` may be a prepared field name or a numeric constant. QDSV uses it internally as a controlled risk adjustment while keeping the private scoring representation inside the runtime.
 
 ## Domain search
 
@@ -83,6 +112,10 @@ Supported preview syntax:
 - `outside(value, minimum, maximum)`
 - `abs_diff(left, right)`
 - `squared_diff(left, right)`
+- `similarity(left, right)`
+- `vector_similarity(left_vector, right_vector)`
+- `within_similarity(left, right, threshold)`
+- `within_vector_similarity(left_vector, right_vector, threshold)`
 - `within_tolerance(left, right, tolerance)`
 - `safe_div(numerator, denominator[, default])`
 - `ratio(numerator, denominator)`
@@ -95,7 +128,7 @@ Supported preview syntax:
 - `mean_fields([value_a, value_b, ...])`
 - `weighted_sum([value_a, value_b, ...], [weight_a, weight_b, ...])`
 
-These are QDSV primitives, not arbitrary Python built-ins. They are intended for bounded predicates, safe numeric handling, tolerance checks, null handling, and row-level signal aggregation.
+These are QDSV primitives, not arbitrary Python built-ins. They are intended for bounded predicates, safe numeric handling, tolerance checks, semantic relations, null handling, and row-level signal aggregation.
 
 Example:
 
@@ -106,6 +139,28 @@ quality = coalesce(field(i, "quality"), 0)
 score = weighted_sum([quality, max(0, 1000 - gap)], [0.6, 0.4])
 find(i).where(within_tolerance(field(i, "amount_a"), field(i, "amount_b"), 5) and between(score, 700, 1000))
 ```
+
+Semantic similarity example:
+
+```python
+i = domain(0, 9)
+sim = similarity(field(i, "reference_a"), field(i, "reference_b"))
+find(i).where(sim >= 850).rank_by(sim).top_k(10)
+```
+
+`similarity(...)` returns a prepared 0..1000 relation signal. It can become part of the intent, predicate, ranking objective, or decision-model input. On QuEST, QDSV can represent it through the semantic/statevector route without user-written circuits; circuit materialization is only used when a selected backend requires and supports it.
+
+Quantum vector similarity example:
+
+```python
+i = domain(0, 9)
+left_state = [field(i, "a1"), field(i, "a2"), field(i, "a3")]
+right_state = [field(i, "b1"), field(i, "b2"), field(i, "b3")]
+overlap = vector_similarity(left_state, right_state)
+find(i).where(overlap >= 850).rank_by(overlap).top_k(10)
+```
+
+`vector_similarity(...)` returns a 0..1000 normalized-overlap / fidelity score over equal-length numeric vectors. It is intended for prepared features, embeddings, amplitudes or state-like signals with comparable meaning.
 
 ## Field access
 

@@ -103,6 +103,7 @@ client.run(source, rows=None, backend="quest")
 - `find_rows(...).where_any(...)`
 - `find_rows(...).rank_by(...).top_k(...)`
 - `find_rows(...).using_decision_model([...]).accept_if(...).rank().top_k(...)`
+- `find_rows(...).using_semantic_score([...], risk_adjustment=...).accept_if(...).rank().top_k(...)`
 - `domain(...), range(...), find(...).where(...)`
 - `field(variable, column)` and `row["column"]`
 - `not`, `in`, `not in`, chained comparisons
@@ -151,6 +152,66 @@ print(result["result"]["selected_rows"])
 ```
 
 Use this operation when a problem is better represented as a multi-signal decision than as a single threshold. QIntent keeps the operation declarative: criteria are visible, while QDSV internal representation stays inside the private runtime.
+
+## Semantic Score Operation
+
+`using_semantic_score(...)` is the advanced public-preview scoring operation for prepared signals. It is useful when a workflow needs to rank candidates using evidence, influence, priority and a prepared risk adjustment without exposing the internal QDSV scoring formula.
+
+Users declare:
+
+- `signal(...)`: a prepared comparable value in the input rows.
+- `influence`: how strongly that signal contributes to the evaluation.
+- `priority`: an operational priority modifier for that signal.
+- `risk_adjustment`: an optional prepared field or constant used by QDSV as a controlled risk adjustment.
+
+```python
+from qintent import QIntentClient
+
+client = QIntentClient(api_key="YOUR_QDSV_API_KEY")
+
+rows = [
+    {
+        "candidate_index": 0,
+        "syndrome_support": 920,
+        "logical_preservation": 860,
+        "decoder_confidence": 810,
+        "propagation_safety": 830,
+        "distance_safety": 850,
+        "logical_risk": 80,
+    },
+    {
+        "candidate_index": 1,
+        "syndrome_support": 910,
+        "logical_preservation": 700,
+        "decoder_confidence": 840,
+        "propagation_safety": 730,
+        "distance_safety": 720,
+        "logical_risk": 220,
+    },
+]
+
+source = """
+find_rows("candidate_index")
+  .using_semantic_score([
+      signal("syndrome_support", influence=30, priority=2),
+      signal("logical_preservation", influence=30, priority=3),
+      signal("decoder_confidence", influence=20, priority=1),
+      signal("propagation_safety", influence=10, priority=2),
+      signal("distance_safety", influence=10, priority=3),
+  ], risk_adjustment="logical_risk")
+  .accept_if(threshold=780)
+  .rank()
+  .top_k(5)
+"""
+
+passport = client.explain(source, rows=rows)
+result = client.run(source, rows=rows)
+
+print(passport["semantic_execution_passport"]["predicate"]["internal_formula_exposed"])
+print(result["result"]["selected_rows"])
+```
+
+This operation is intended for controlled evidence-ranking workflows, including classical triage, candidate prioritization, benchmarking, and qLDPC-style correction-candidate evaluation. The public API exposes the declared signals and evidence outputs, not the private QDSV scoring formula.
 
 ## Semantic Similarity
 
