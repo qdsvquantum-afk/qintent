@@ -1,9 +1,7 @@
-import os
-
 from qintent import QIntentClient
 
 
-client = QIntentClient(api_key=os.getenv("QINTENT_API_KEY") or "YOUR_QDSV_API_KEY")
+client = QIntentClient()
 
 # Toy qLDPC-style correction candidates.
 # Values are prepared on a 0..1000 scale before entering QIntent.

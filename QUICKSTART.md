@@ -11,7 +11,7 @@ Run a first query:
 ```python
 from qintent import QIntentClient
 
-client = QIntentClient(api_key="YOUR_QDSV_API_KEY")
+client = QIntentClient()
 
 rows = [
     {"candidate_index": 0, "score": 720},
@@ -72,4 +72,4 @@ Private Docker/local execution is available only when a private QDSV node is onl
 
 QIntent is a declarative intent language powered by QDSV. The SDK is a client only; it does not install QDSV Runtime locally.
 
-Public informational endpoints can be viewed without a key. Value-producing API calls such as `validate`, `compile`, `explain` and `run` require an SDK API key and are limited by monthly quota.
+Public informational endpoints can be viewed without a key. Public demo deployments also allow value-producing calls such as `validate`, `compile`, `explain` and `run` without a key, using deployment-controlled IP or optional API-key quota buckets.

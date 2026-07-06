@@ -32,7 +32,7 @@ Run a first intent:
 ```python
 from qintent import QIntentClient
 
-client = QIntentClient(api_key="YOUR_QDSV_API_KEY")
+client = QIntentClient()
 
 rows = [
     {"candidate_index": 0, "score": 720, "risk_ok": True},
@@ -128,7 +128,7 @@ Users declare criteria, importance, priority, an acceptance rule and ranking beh
 ```python
 from qintent import QIntentClient
 
-client = QIntentClient(api_key="YOUR_QDSV_API_KEY")
+client = QIntentClient()
 
 rows = [
     {"candidate_index": 0, "credit_score_norm": 780, "default_score": 1000, "debt_burden_score": 900},
@@ -168,7 +168,7 @@ Users declare:
 ```python
 from qintent import QIntentClient
 
-client = QIntentClient(api_key="YOUR_QDSV_API_KEY")
+client = QIntentClient()
 
 rows = [
     {
@@ -223,7 +223,7 @@ The public syntax exposes operational structure, not the private QDSV hierarchic
 ```python
 from qintent import QIntentClient
 
-client = QIntentClient(api_key="YOUR_QDSV_API_KEY")
+client = QIntentClient()
 
 rows = [
     {
@@ -319,29 +319,29 @@ client.run(source, backend="aer")   # when supported by the deployment
 
 ## Public API And Access
 
-Public informational endpoints such as `spec()` and `examples()` can be opened without a key. Value-producing API calls such as `validate`, `compile`, `explain` and `run` require an SDK API key:
+Public informational endpoints such as `spec()` and `examples()` can be opened without a key. Public-preview value calls such as `validate`, `compile`, `explain` and `run` are also available without a key when the deployment is configured for public demo mode:
 
 ```python
-client = QIntentClient(api_key="YOUR_QDSV_API_KEY")
+client = QIntentClient()
 ```
 
-The SDK can also send a Qruba/QDSV license key when your deployment requires it, but SDK cloud quotas are controlled by API key:
+In public demo mode, usage is limited by an IP-based access bucket. The SDK can still send optional API or license keys when a private deployment enables them:
 
 ```python
-client = QIntentClient(api_key="...", license_key="...")
+client = QIntentClient(api_key="optional_private_key", license_key="optional_license_key")
 ```
 
 Environment variables:
 
 ```bash
 QINTENT_API_URL=https://api.qdsv.cloud/api
-QINTENT_API_KEY=...
-QDSV_LICENSE_KEY=...
+QINTENT_API_KEY=optional_private_key
+QDSV_LICENSE_KEY=optional_license_key
 ```
 
 Initial public SDK quota:
 
-- QIntent value requests: 100/month per API key.
+- QIntent value requests: deployment-controlled, default 100/month per IP or optional API key bucket.
 - QIntent rows: deployment-controlled, default 200 rows/request.
 - Hardware execution: not available from public SDK preview.
 
@@ -359,9 +359,9 @@ If the private node is unavailable, it may be offline, reserved for private proc
 ```bash
 qintent spec
 qintent examples
-qintent compile 'x = domain(0, 15); find(x).where(x in [3, 6, 9])' --api-key YOUR_QDSV_API_KEY
-qintent explain 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv --api-key YOUR_QDSV_API_KEY
-qintent run 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv --api-key YOUR_QDSV_API_KEY
+qintent compile 'x = domain(0, 15); find(x).where(x in [3, 6, 9])'
+qintent explain 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv
+qintent run 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv
 ```
 
 ## Examples And Notebooks
