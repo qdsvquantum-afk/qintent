@@ -22,6 +22,7 @@ find_rows("candidate_index").where_any(["risk_ok", "manual_review_ok"])
 find_rows("candidate_index").rank_by("score").top_k(10)
 find_rows("candidate_index").using_decision_model([...]).accept_if(threshold=850).rank().top_k(10)
 find_rows("candidate_index").using_semantic_score([...], risk_adjustment="risk").accept_if(threshold=850).rank().top_k(10)
+find_rows("candidate_index").using_structured_semantic_score([...], global_risk="risk", profile="qldpc_post_decoding").accept_if(threshold=850).rank().top_k(10)
 ```
 
 ### Decision model
@@ -79,6 +80,51 @@ Each `signal(...)` uses:
 - `priority`: optional priority modifier, defaulting to `1`.
 
 `risk_adjustment` may be a prepared field name or a numeric constant. QDSV uses it internally as a controlled risk adjustment while keeping the private scoring representation inside the runtime.
+
+### Structured semantic score
+
+`using_structured_semantic_score(...)` declares an advanced QDSV structured scoring operation over prepared signal blocks without exposing the internal hierarchical or nonlinear formula.
+
+Use it when candidates are naturally evaluated through groups of evidence, local risk, global risk and prepared adjustment fields.
+
+```python
+find_rows("candidate_index")
+  .using_structured_semantic_score([
+      block("syndrome", [
+          signal("syndrome_support", influence=30, priority=2),
+          signal("check_consistency", influence=20, priority=1),
+      ], influence=30, priority=2, risk_adjustment="syndrome_risk", adjustments=[
+          adjustment("syndrome_entropy_adjustment", influence=5),
+      ]),
+      block("logical_safety", [
+          signal("logical_preservation", influence=40, priority=3),
+          signal("distance_safety", influence=20, priority=2),
+      ], influence=40, priority=3, risk_adjustment="logical_risk"),
+      block("decoder", [
+          signal("decoder_confidence", influence=25, priority=1),
+          signal("propagation_safety", influence=15, priority=2),
+      ], influence=30, priority=1),
+  ], global_risk="logical_risk", profile="qldpc_post_decoding")
+  .accept_if(threshold=600)
+  .rank()
+  .top_k(5)
+```
+
+Each `block(...)` uses:
+
+- `name`: public operational block name.
+- `signals`: list of `signal(...)` prepared fields.
+- `influence`: operational influence of the block.
+- `priority`: optional priority modifier, defaulting to `1`.
+- `risk_adjustment`: optional prepared field name or numeric constant.
+- `adjustments`: optional list of prepared `adjustment(...)` fields.
+
+Each `adjustment(...)` uses:
+
+- `field`: prepared adjustment column.
+- `influence`: operational influence of the adjustment.
+
+The public API exposes declared blocks, signals, risk fields and evidence outputs. The private QDSV hierarchical/nonlinear scoring representation remains inside the runtime.
 
 ## Domain search
 

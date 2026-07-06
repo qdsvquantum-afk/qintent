@@ -104,6 +104,7 @@ client.run(source, rows=None, backend="quest")
 - `find_rows(...).rank_by(...).top_k(...)`
 - `find_rows(...).using_decision_model([...]).accept_if(...).rank().top_k(...)`
 - `find_rows(...).using_semantic_score([...], risk_adjustment=...).accept_if(...).rank().top_k(...)`
+- `find_rows(...).using_structured_semantic_score([...], global_risk=..., profile=...).accept_if(...).rank().top_k(...)`
 - `domain(...), range(...), find(...).where(...)`
 - `field(variable, column)` and `row["column"]`
 - `not`, `in`, `not in`, chained comparisons
@@ -212,6 +213,64 @@ print(result["result"]["selected_rows"])
 ```
 
 This operation is intended for controlled evidence-ranking workflows, including classical triage, candidate prioritization, benchmarking, and qLDPC-style correction-candidate evaluation. The public API exposes the declared signals and evidence outputs, not the private QDSV scoring formula.
+
+## Structured Semantic Score Operation
+
+`using_structured_semantic_score(...)` is the advanced public-preview operation for hierarchical prepared-signal workflows. It is useful when candidates should be evaluated through blocks such as syndrome evidence, logical safety, decoder confidence, propagation safety, and global risk.
+
+The public syntax exposes operational structure, not the private QDSV hierarchical or nonlinear scoring representation.
+
+```python
+from qintent import QIntentClient
+
+client = QIntentClient(api_key="YOUR_QDSV_API_KEY")
+
+rows = [
+    {
+        "candidate_index": 0,
+        "syndrome_support": 930,
+        "check_consistency": 900,
+        "logical_preservation": 820,
+        "distance_safety": 830,
+        "decoder_confidence": 850,
+        "propagation_safety": 820,
+        "syndrome_risk": 50,
+        "logical_risk": 120,
+        "syndrome_entropy_adjustment": -10,
+    }
+]
+
+source = """
+find_rows("candidate_index")
+  .using_structured_semantic_score([
+      block("syndrome", [
+          signal("syndrome_support", influence=30, priority=2),
+          signal("check_consistency", influence=20, priority=1),
+      ], influence=30, priority=2, risk_adjustment="syndrome_risk", adjustments=[
+          adjustment("syndrome_entropy_adjustment", influence=5),
+      ]),
+      block("logical_safety", [
+          signal("logical_preservation", influence=40, priority=3),
+          signal("distance_safety", influence=20, priority=2),
+      ], influence=40, priority=3, risk_adjustment="logical_risk"),
+      block("decoder", [
+          signal("decoder_confidence", influence=25, priority=1),
+          signal("propagation_safety", influence=15, priority=2),
+      ], influence=30, priority=1),
+  ], global_risk="logical_risk", profile="qldpc_post_decoding")
+  .accept_if(threshold=600)
+  .rank()
+  .top_k(5)
+"""
+
+passport = client.explain(source, rows=rows)
+result = client.run(source, rows=rows)
+
+print(passport["semantic_execution_passport"]["predicate"]["internal_formula_exposed"])
+print(result["result"]["selected_rows"])
+```
+
+This operation is intended for structured evidence-ranking workflows, including qLDPC-style post-decoding analysis where a decoder produces candidate corrections and QDSV ranks them with block-level evidence, local/global risk and an auditable decision trace.
 
 ## Semantic Similarity
 
