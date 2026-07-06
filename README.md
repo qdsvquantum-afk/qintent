@@ -369,6 +369,7 @@ qintent run 'find_rows("candidate_index").where("score", ">=", 850)' --rows cand
 - [Quickstart](QUICKSTART.md)
 - [Examples](examples/)
 - [Notebooks](notebooks/)
+- [qLDPC-style structured semantic score Colab](https://colab.research.google.com/github/qdsvquantum-afk/qintent/blob/main/notebooks/qldpc_structured_semantic_score_colab.ipynb)
 - [Public grammar](grammar/QINTENT_PREVIEW.md)
 - [Roadmap](ROADMAP.md)
 
