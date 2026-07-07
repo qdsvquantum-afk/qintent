@@ -373,6 +373,7 @@ qintent run 'find_rows("candidate_index").where("score", ">=", 850)' --rows cand
 - [qLDPC batch decoder-generated candidates Colab](https://colab.research.google.com/github/qdsvquantum-afk/qintent/blob/main/notebooks/qldpc_batch_decoder_semantic_score_colab.ipynb)
 - [qLDPC controlled formal benchmark Colab](https://colab.research.google.com/github/qdsvquantum-afk/qintent/blob/main/notebooks/qldpc_formal_benchmark_colab.ipynb)
 - [qLDPC random sparse benchmark Colab](https://colab.research.google.com/github/qdsvquantum-afk/qintent/blob/main/notebooks/qldpc_random_sparse_benchmark_colab.ipynb)
+- [qLDPC BP-soft decoder reranking Colab](https://colab.research.google.com/github/qdsvquantum-afk/qintent/blob/main/notebooks/qldpc_bp_soft_decoder_reranking_colab.ipynb)
 - [Technical note: QDSV/QIntent as a risk-aware qLDPC-style post-decoding layer](docs/research/qldpc_post_decoding_note.md)
 - [Public grammar](grammar/QINTENT_PREVIEW.md)
 - [Roadmap](ROADMAP.md)
