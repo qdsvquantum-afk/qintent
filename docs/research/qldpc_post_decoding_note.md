@@ -235,6 +235,11 @@ qdsv_qldpc_formal_benchmark_evidence.json
 qdsv_qldpc_formal_benchmark_summary.csv
 ```
 
+The generated evidence used for this note is archived in this repository:
+
+- [evidence/qdsv_qldpc_formal_benchmark_evidence.json](evidence/qdsv_qldpc_formal_benchmark_evidence.json)
+- [evidence/qdsv_qldpc_formal_benchmark_summary.csv](evidence/qdsv_qldpc_formal_benchmark_summary.csv)
+
 The QIntent public preview endpoint used in the notebook exposes:
 
 ```text

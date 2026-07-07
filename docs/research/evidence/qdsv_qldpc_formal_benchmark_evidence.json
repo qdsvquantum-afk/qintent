@@ -1,0 +1,1292 @@
+{
+  "api_url": "https://qdsv-api-568788785178.us-central1.run.app/api",
+  "profile": "qldpc_formal_benchmark",
+  "benchmark_design": {
+    "m_checks": 14,
+    "n_blocks": 6,
+    "max_candidate_weight": 3,
+    "physical_error_rate": 0.07,
+    "construction": "Each block has H[sensitive] = H[safe_a] xor H[safe_b]. True errors are correlated safe pairs."
+  },
+  "check_columns": {
+    "0": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "1": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "2": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "3": [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "4": [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "5": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "6": [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    "7": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    "8": [
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0
+    ],
+    "9": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "10": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "11": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1
+    ],
+    "12": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "13": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "14": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "15": [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    "16": [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    "17": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0
+    ]
+  },
+  "logical_sensitive_qubits": [
+    2,
+    5,
+    8,
+    11,
+    14,
+    17
+  ],
+  "scenario_metadata": [
+    {
+      "scenario_id": 0,
+      "true_error_qubits": "0 1",
+      "risky_singleton": "2",
+      "observed_syndrome": "11000011000000",
+      "candidate_count": 2
+    },
+    {
+      "scenario_id": 1,
+      "true_error_qubits": "3 4",
+      "risky_singleton": "5",
+      "observed_syndrome": "00110000110000",
+      "candidate_count": 2
+    },
+    {
+      "scenario_id": 2,
+      "true_error_qubits": "6 7",
+      "risky_singleton": "8",
+      "observed_syndrome": "00001100001100",
+      "candidate_count": 2
+    },
+    {
+      "scenario_id": 3,
+      "true_error_qubits": "9 10",
+      "risky_singleton": "11",
+      "observed_syndrome": "00000011000011",
+      "candidate_count": 2
+    },
+    {
+      "scenario_id": 4,
+      "true_error_qubits": "12 13",
+      "risky_singleton": "14",
+      "observed_syndrome": "11000000110000",
+      "candidate_count": 2
+    },
+    {
+      "scenario_id": 5,
+      "true_error_qubits": "15 16",
+      "risky_singleton": "17",
+      "observed_syndrome": "00110000001100",
+      "candidate_count": 2
+    }
+  ],
+  "qintent_source": "\nfind_rows(\"candidate_index\")\n  .using_structured_semantic_score([\n      block(\"syndrome\", [\n          signal(\"syndrome_support\", influence=30, priority=2),\n          signal(\"check_consistency\", influence=20, priority=1),\n      ], influence=30, priority=2, risk_adjustment=\"syndrome_risk\", adjustments=[\n          adjustment(\"syndrome_entropy_adjustment\", influence=5),\n      ]),\n      block(\"logical_safety\", [\n          signal(\"logical_preservation\", influence=40, priority=3),\n          signal(\"distance_safety\", influence=20, priority=2),\n      ], influence=40, priority=3, risk_adjustment=\"logical_risk\"),\n      block(\"decoder\", [\n          signal(\"decoder_confidence\", influence=25, priority=1),\n          signal(\"propagation_safety\", influence=15, priority=2),\n      ], influence=30, priority=1),\n  ], global_risk=\"logical_risk\", profile=\"qldpc_formal_benchmark\")\n  .accept_if(threshold=600)\n  .rank()\n  .top_k(1)\n",
+  "predicate_summary": {
+    "kind": "structured_semantic_score",
+    "combine": null,
+    "rules_count": null,
+    "criteria_count": 0,
+    "blocks_count": 3,
+    "signals_count": 6,
+    "decision": "gte",
+    "threshold": 600,
+    "internal_formula_exposed": false
+  },
+  "summary": [
+    {
+      "scenario_id": 0,
+      "true_error_qubits": "0 1",
+      "risky_singleton": "2",
+      "observed_syndrome": "11000011000000",
+      "candidate_count": 2,
+      "baseline_qubits": "2",
+      "baseline_confidence": 1000,
+      "baseline_logical_risk": 263,
+      "baseline_exact": false,
+      "baseline_logical_failure_proxy": true,
+      "qdsv_qubits": "0 1",
+      "qdsv_confidence": 600,
+      "qdsv_logical_risk": 56,
+      "qdsv_exact": true,
+      "qdsv_logical_failure_proxy": false,
+      "risk_reduction": 207
+    },
+    {
+      "scenario_id": 1,
+      "true_error_qubits": "3 4",
+      "risky_singleton": "5",
+      "observed_syndrome": "00110000110000",
+      "candidate_count": 2,
+      "baseline_qubits": "5",
+      "baseline_confidence": 1000,
+      "baseline_logical_risk": 263,
+      "baseline_exact": false,
+      "baseline_logical_failure_proxy": true,
+      "qdsv_qubits": "3 4",
+      "qdsv_confidence": 600,
+      "qdsv_logical_risk": 56,
+      "qdsv_exact": true,
+      "qdsv_logical_failure_proxy": false,
+      "risk_reduction": 207
+    },
+    {
+      "scenario_id": 2,
+      "true_error_qubits": "6 7",
+      "risky_singleton": "8",
+      "observed_syndrome": "00001100001100",
+      "candidate_count": 2,
+      "baseline_qubits": "8",
+      "baseline_confidence": 1000,
+      "baseline_logical_risk": 263,
+      "baseline_exact": false,
+      "baseline_logical_failure_proxy": true,
+      "qdsv_qubits": "6 7",
+      "qdsv_confidence": 600,
+      "qdsv_logical_risk": 56,
+      "qdsv_exact": true,
+      "qdsv_logical_failure_proxy": false,
+      "risk_reduction": 207
+    },
+    {
+      "scenario_id": 3,
+      "true_error_qubits": "9 10",
+      "risky_singleton": "11",
+      "observed_syndrome": "00000011000011",
+      "candidate_count": 2,
+      "baseline_qubits": "11",
+      "baseline_confidence": 1000,
+      "baseline_logical_risk": 263,
+      "baseline_exact": false,
+      "baseline_logical_failure_proxy": true,
+      "qdsv_qubits": "9 10",
+      "qdsv_confidence": 600,
+      "qdsv_logical_risk": 56,
+      "qdsv_exact": true,
+      "qdsv_logical_failure_proxy": false,
+      "risk_reduction": 207
+    },
+    {
+      "scenario_id": 4,
+      "true_error_qubits": "12 13",
+      "risky_singleton": "14",
+      "observed_syndrome": "11000000110000",
+      "candidate_count": 2,
+      "baseline_qubits": "14",
+      "baseline_confidence": 1000,
+      "baseline_logical_risk": 263,
+      "baseline_exact": false,
+      "baseline_logical_failure_proxy": true,
+      "qdsv_qubits": "12 13",
+      "qdsv_confidence": 600,
+      "qdsv_logical_risk": 56,
+      "qdsv_exact": true,
+      "qdsv_logical_failure_proxy": false,
+      "risk_reduction": 207
+    },
+    {
+      "scenario_id": 5,
+      "true_error_qubits": "15 16",
+      "risky_singleton": "17",
+      "observed_syndrome": "00110000001100",
+      "candidate_count": 2,
+      "baseline_qubits": "17",
+      "baseline_confidence": 1000,
+      "baseline_logical_risk": 263,
+      "baseline_exact": false,
+      "baseline_logical_failure_proxy": true,
+      "qdsv_qubits": "15 16",
+      "qdsv_confidence": 600,
+      "qdsv_logical_risk": 56,
+      "qdsv_exact": true,
+      "qdsv_logical_failure_proxy": false,
+      "risk_reduction": 207
+    }
+  ],
+  "metrics": {
+    "scenarios": 6,
+    "baseline_exact_rate": 0.0,
+    "qdsv_exact_rate": 1.0,
+    "baseline_logical_failure_proxy_rate": 1.0,
+    "qdsv_logical_failure_proxy_rate": 0.0,
+    "baseline_avg_logical_risk": 263.0,
+    "qdsv_avg_logical_risk": 56.0,
+    "avg_risk_reduction": 207.0
+  },
+  "selected_by_scenario": [
+    {
+      "scenario_id": 0,
+      "candidate_index": 1,
+      "correction_qubits": "0 1",
+      "candidate_weight": 2,
+      "observed_syndrome": "11000011000000",
+      "predicted_syndrome": "11000011000000",
+      "syndrome_support": 982,
+      "check_consistency": 1000,
+      "logical_preservation": 943,
+      "distance_safety": 909,
+      "decoder_confidence": 600,
+      "propagation_safety": 835,
+      "syndrome_risk": 50,
+      "logical_risk": 56,
+      "syndrome_entropy_adjustment": 18,
+      "exact_correction": true,
+      "logical_failure_proxy": false,
+      "_qdsv_structured_semantic_score": 827.0672349090909,
+      "_qdsv_selected": true,
+      "_qdsv_decision_model": {
+        "selected": true,
+        "value": 827.0672349090909,
+        "decision": "gte",
+        "threshold": 600,
+        "blocks": [
+          {
+            "name": "syndrome",
+            "value": 938.03,
+            "importance": 30,
+            "priority": 2,
+            "criteria": [
+              {
+                "field": "syndrome_support",
+                "value": 982,
+                "importance": 30,
+                "priority": 2
+              },
+              {
+                "field": "check_consistency",
+                "value": 1000,
+                "importance": 20,
+                "priority": 1
+              }
+            ],
+            "adjustments": [
+              {
+                "field": "syndrome_entropy_adjustment",
+                "value": 18,
+                "influence": 5
+              }
+            ],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "syndrome_risk",
+              "value": 50,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "logical_safety",
+            "value": 882.168,
+            "importance": 40,
+            "priority": 3,
+            "criteria": [
+              {
+                "field": "logical_preservation",
+                "value": 943,
+                "importance": 40,
+                "priority": 3
+              },
+              {
+                "field": "distance_safety",
+                "value": 909,
+                "importance": 20,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "logical_risk",
+              "value": 56,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "decoder",
+            "value": 728.1818181818181,
+            "importance": 30,
+            "priority": 1,
+            "criteria": [
+              {
+                "field": "decoder_confidence",
+                "value": 600,
+                "importance": 25,
+                "priority": 1
+              },
+              {
+                "field": "propagation_safety",
+                "value": 835,
+                "importance": 15,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "constant",
+              "value": 0,
+              "risk_scale": 1000
+            }
+          }
+        ],
+        "global_risk": {
+          "source": "field",
+          "field": "logical_risk",
+          "value": 56,
+          "risk_scale": 1000
+        },
+        "profile": "qldpc_formal_benchmark",
+        "public_operation": "structured_semantic_score",
+        "internal_formula_exposed": false
+      },
+      "_qdsv_feasible": true,
+      "_qdsv_rank": 1,
+      "_qdsv_score": 827.0672349090909,
+      "qdsv_selected_semantic": true,
+      "qdsv_selected_hardware": null,
+      "qruba_reliability_status": "not_available",
+      "qruba_accepted_as_reliable": null,
+      "qruba_final_decision": true,
+      "qdsv_selected_final_decision": true,
+      "qdsv_selected_decision_source": "semantic"
+    },
+    {
+      "scenario_id": 1,
+      "candidate_index": 1,
+      "correction_qubits": "3 4",
+      "candidate_weight": 2,
+      "observed_syndrome": "00110000110000",
+      "predicted_syndrome": "00110000110000",
+      "syndrome_support": 982,
+      "check_consistency": 1000,
+      "logical_preservation": 943,
+      "distance_safety": 909,
+      "decoder_confidence": 600,
+      "propagation_safety": 835,
+      "syndrome_risk": 50,
+      "logical_risk": 56,
+      "syndrome_entropy_adjustment": 18,
+      "exact_correction": true,
+      "logical_failure_proxy": false,
+      "_qdsv_structured_semantic_score": 827.0672349090909,
+      "_qdsv_selected": true,
+      "_qdsv_decision_model": {
+        "selected": true,
+        "value": 827.0672349090909,
+        "decision": "gte",
+        "threshold": 600,
+        "blocks": [
+          {
+            "name": "syndrome",
+            "value": 938.03,
+            "importance": 30,
+            "priority": 2,
+            "criteria": [
+              {
+                "field": "syndrome_support",
+                "value": 982,
+                "importance": 30,
+                "priority": 2
+              },
+              {
+                "field": "check_consistency",
+                "value": 1000,
+                "importance": 20,
+                "priority": 1
+              }
+            ],
+            "adjustments": [
+              {
+                "field": "syndrome_entropy_adjustment",
+                "value": 18,
+                "influence": 5
+              }
+            ],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "syndrome_risk",
+              "value": 50,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "logical_safety",
+            "value": 882.168,
+            "importance": 40,
+            "priority": 3,
+            "criteria": [
+              {
+                "field": "logical_preservation",
+                "value": 943,
+                "importance": 40,
+                "priority": 3
+              },
+              {
+                "field": "distance_safety",
+                "value": 909,
+                "importance": 20,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "logical_risk",
+              "value": 56,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "decoder",
+            "value": 728.1818181818181,
+            "importance": 30,
+            "priority": 1,
+            "criteria": [
+              {
+                "field": "decoder_confidence",
+                "value": 600,
+                "importance": 25,
+                "priority": 1
+              },
+              {
+                "field": "propagation_safety",
+                "value": 835,
+                "importance": 15,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "constant",
+              "value": 0,
+              "risk_scale": 1000
+            }
+          }
+        ],
+        "global_risk": {
+          "source": "field",
+          "field": "logical_risk",
+          "value": 56,
+          "risk_scale": 1000
+        },
+        "profile": "qldpc_formal_benchmark",
+        "public_operation": "structured_semantic_score",
+        "internal_formula_exposed": false
+      },
+      "_qdsv_feasible": true,
+      "_qdsv_rank": 1,
+      "_qdsv_score": 827.0672349090909,
+      "qdsv_selected_semantic": true,
+      "qdsv_selected_hardware": null,
+      "qruba_reliability_status": "not_available",
+      "qruba_accepted_as_reliable": null,
+      "qruba_final_decision": true,
+      "qdsv_selected_final_decision": true,
+      "qdsv_selected_decision_source": "semantic"
+    },
+    {
+      "scenario_id": 2,
+      "candidate_index": 1,
+      "correction_qubits": "6 7",
+      "candidate_weight": 2,
+      "observed_syndrome": "00001100001100",
+      "predicted_syndrome": "00001100001100",
+      "syndrome_support": 982,
+      "check_consistency": 1000,
+      "logical_preservation": 943,
+      "distance_safety": 909,
+      "decoder_confidence": 600,
+      "propagation_safety": 835,
+      "syndrome_risk": 50,
+      "logical_risk": 56,
+      "syndrome_entropy_adjustment": 18,
+      "exact_correction": true,
+      "logical_failure_proxy": false,
+      "_qdsv_structured_semantic_score": 827.0672349090909,
+      "_qdsv_selected": true,
+      "_qdsv_decision_model": {
+        "selected": true,
+        "value": 827.0672349090909,
+        "decision": "gte",
+        "threshold": 600,
+        "blocks": [
+          {
+            "name": "syndrome",
+            "value": 938.03,
+            "importance": 30,
+            "priority": 2,
+            "criteria": [
+              {
+                "field": "syndrome_support",
+                "value": 982,
+                "importance": 30,
+                "priority": 2
+              },
+              {
+                "field": "check_consistency",
+                "value": 1000,
+                "importance": 20,
+                "priority": 1
+              }
+            ],
+            "adjustments": [
+              {
+                "field": "syndrome_entropy_adjustment",
+                "value": 18,
+                "influence": 5
+              }
+            ],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "syndrome_risk",
+              "value": 50,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "logical_safety",
+            "value": 882.168,
+            "importance": 40,
+            "priority": 3,
+            "criteria": [
+              {
+                "field": "logical_preservation",
+                "value": 943,
+                "importance": 40,
+                "priority": 3
+              },
+              {
+                "field": "distance_safety",
+                "value": 909,
+                "importance": 20,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "logical_risk",
+              "value": 56,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "decoder",
+            "value": 728.1818181818181,
+            "importance": 30,
+            "priority": 1,
+            "criteria": [
+              {
+                "field": "decoder_confidence",
+                "value": 600,
+                "importance": 25,
+                "priority": 1
+              },
+              {
+                "field": "propagation_safety",
+                "value": 835,
+                "importance": 15,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "constant",
+              "value": 0,
+              "risk_scale": 1000
+            }
+          }
+        ],
+        "global_risk": {
+          "source": "field",
+          "field": "logical_risk",
+          "value": 56,
+          "risk_scale": 1000
+        },
+        "profile": "qldpc_formal_benchmark",
+        "public_operation": "structured_semantic_score",
+        "internal_formula_exposed": false
+      },
+      "_qdsv_feasible": true,
+      "_qdsv_rank": 1,
+      "_qdsv_score": 827.0672349090909,
+      "qdsv_selected_semantic": true,
+      "qdsv_selected_hardware": null,
+      "qruba_reliability_status": "not_available",
+      "qruba_accepted_as_reliable": null,
+      "qruba_final_decision": true,
+      "qdsv_selected_final_decision": true,
+      "qdsv_selected_decision_source": "semantic"
+    },
+    {
+      "scenario_id": 3,
+      "candidate_index": 1,
+      "correction_qubits": "9 10",
+      "candidate_weight": 2,
+      "observed_syndrome": "00000011000011",
+      "predicted_syndrome": "00000011000011",
+      "syndrome_support": 982,
+      "check_consistency": 1000,
+      "logical_preservation": 943,
+      "distance_safety": 909,
+      "decoder_confidence": 600,
+      "propagation_safety": 835,
+      "syndrome_risk": 50,
+      "logical_risk": 56,
+      "syndrome_entropy_adjustment": 18,
+      "exact_correction": true,
+      "logical_failure_proxy": false,
+      "_qdsv_structured_semantic_score": 827.0672349090909,
+      "_qdsv_selected": true,
+      "_qdsv_decision_model": {
+        "selected": true,
+        "value": 827.0672349090909,
+        "decision": "gte",
+        "threshold": 600,
+        "blocks": [
+          {
+            "name": "syndrome",
+            "value": 938.03,
+            "importance": 30,
+            "priority": 2,
+            "criteria": [
+              {
+                "field": "syndrome_support",
+                "value": 982,
+                "importance": 30,
+                "priority": 2
+              },
+              {
+                "field": "check_consistency",
+                "value": 1000,
+                "importance": 20,
+                "priority": 1
+              }
+            ],
+            "adjustments": [
+              {
+                "field": "syndrome_entropy_adjustment",
+                "value": 18,
+                "influence": 5
+              }
+            ],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "syndrome_risk",
+              "value": 50,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "logical_safety",
+            "value": 882.168,
+            "importance": 40,
+            "priority": 3,
+            "criteria": [
+              {
+                "field": "logical_preservation",
+                "value": 943,
+                "importance": 40,
+                "priority": 3
+              },
+              {
+                "field": "distance_safety",
+                "value": 909,
+                "importance": 20,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "logical_risk",
+              "value": 56,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "decoder",
+            "value": 728.1818181818181,
+            "importance": 30,
+            "priority": 1,
+            "criteria": [
+              {
+                "field": "decoder_confidence",
+                "value": 600,
+                "importance": 25,
+                "priority": 1
+              },
+              {
+                "field": "propagation_safety",
+                "value": 835,
+                "importance": 15,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "constant",
+              "value": 0,
+              "risk_scale": 1000
+            }
+          }
+        ],
+        "global_risk": {
+          "source": "field",
+          "field": "logical_risk",
+          "value": 56,
+          "risk_scale": 1000
+        },
+        "profile": "qldpc_formal_benchmark",
+        "public_operation": "structured_semantic_score",
+        "internal_formula_exposed": false
+      },
+      "_qdsv_feasible": true,
+      "_qdsv_rank": 1,
+      "_qdsv_score": 827.0672349090909,
+      "qdsv_selected_semantic": true,
+      "qdsv_selected_hardware": null,
+      "qruba_reliability_status": "not_available",
+      "qruba_accepted_as_reliable": null,
+      "qruba_final_decision": true,
+      "qdsv_selected_final_decision": true,
+      "qdsv_selected_decision_source": "semantic"
+    },
+    {
+      "scenario_id": 4,
+      "candidate_index": 1,
+      "correction_qubits": "12 13",
+      "candidate_weight": 2,
+      "observed_syndrome": "11000000110000",
+      "predicted_syndrome": "11000000110000",
+      "syndrome_support": 982,
+      "check_consistency": 1000,
+      "logical_preservation": 943,
+      "distance_safety": 909,
+      "decoder_confidence": 600,
+      "propagation_safety": 835,
+      "syndrome_risk": 50,
+      "logical_risk": 56,
+      "syndrome_entropy_adjustment": 18,
+      "exact_correction": true,
+      "logical_failure_proxy": false,
+      "_qdsv_structured_semantic_score": 827.0672349090909,
+      "_qdsv_selected": true,
+      "_qdsv_decision_model": {
+        "selected": true,
+        "value": 827.0672349090909,
+        "decision": "gte",
+        "threshold": 600,
+        "blocks": [
+          {
+            "name": "syndrome",
+            "value": 938.03,
+            "importance": 30,
+            "priority": 2,
+            "criteria": [
+              {
+                "field": "syndrome_support",
+                "value": 982,
+                "importance": 30,
+                "priority": 2
+              },
+              {
+                "field": "check_consistency",
+                "value": 1000,
+                "importance": 20,
+                "priority": 1
+              }
+            ],
+            "adjustments": [
+              {
+                "field": "syndrome_entropy_adjustment",
+                "value": 18,
+                "influence": 5
+              }
+            ],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "syndrome_risk",
+              "value": 50,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "logical_safety",
+            "value": 882.168,
+            "importance": 40,
+            "priority": 3,
+            "criteria": [
+              {
+                "field": "logical_preservation",
+                "value": 943,
+                "importance": 40,
+                "priority": 3
+              },
+              {
+                "field": "distance_safety",
+                "value": 909,
+                "importance": 20,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "logical_risk",
+              "value": 56,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "decoder",
+            "value": 728.1818181818181,
+            "importance": 30,
+            "priority": 1,
+            "criteria": [
+              {
+                "field": "decoder_confidence",
+                "value": 600,
+                "importance": 25,
+                "priority": 1
+              },
+              {
+                "field": "propagation_safety",
+                "value": 835,
+                "importance": 15,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "constant",
+              "value": 0,
+              "risk_scale": 1000
+            }
+          }
+        ],
+        "global_risk": {
+          "source": "field",
+          "field": "logical_risk",
+          "value": 56,
+          "risk_scale": 1000
+        },
+        "profile": "qldpc_formal_benchmark",
+        "public_operation": "structured_semantic_score",
+        "internal_formula_exposed": false
+      },
+      "_qdsv_feasible": true,
+      "_qdsv_rank": 1,
+      "_qdsv_score": 827.0672349090909,
+      "qdsv_selected_semantic": true,
+      "qdsv_selected_hardware": null,
+      "qruba_reliability_status": "not_available",
+      "qruba_accepted_as_reliable": null,
+      "qruba_final_decision": true,
+      "qdsv_selected_final_decision": true,
+      "qdsv_selected_decision_source": "semantic"
+    },
+    {
+      "scenario_id": 5,
+      "candidate_index": 1,
+      "correction_qubits": "15 16",
+      "candidate_weight": 2,
+      "observed_syndrome": "00110000001100",
+      "predicted_syndrome": "00110000001100",
+      "syndrome_support": 982,
+      "check_consistency": 1000,
+      "logical_preservation": 943,
+      "distance_safety": 909,
+      "decoder_confidence": 600,
+      "propagation_safety": 835,
+      "syndrome_risk": 50,
+      "logical_risk": 56,
+      "syndrome_entropy_adjustment": 18,
+      "exact_correction": true,
+      "logical_failure_proxy": false,
+      "_qdsv_structured_semantic_score": 827.0672349090909,
+      "_qdsv_selected": true,
+      "_qdsv_decision_model": {
+        "selected": true,
+        "value": 827.0672349090909,
+        "decision": "gte",
+        "threshold": 600,
+        "blocks": [
+          {
+            "name": "syndrome",
+            "value": 938.03,
+            "importance": 30,
+            "priority": 2,
+            "criteria": [
+              {
+                "field": "syndrome_support",
+                "value": 982,
+                "importance": 30,
+                "priority": 2
+              },
+              {
+                "field": "check_consistency",
+                "value": 1000,
+                "importance": 20,
+                "priority": 1
+              }
+            ],
+            "adjustments": [
+              {
+                "field": "syndrome_entropy_adjustment",
+                "value": 18,
+                "influence": 5
+              }
+            ],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "syndrome_risk",
+              "value": 50,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "logical_safety",
+            "value": 882.168,
+            "importance": 40,
+            "priority": 3,
+            "criteria": [
+              {
+                "field": "logical_preservation",
+                "value": 943,
+                "importance": 40,
+                "priority": 3
+              },
+              {
+                "field": "distance_safety",
+                "value": 909,
+                "importance": 20,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "logical_risk",
+              "value": 56,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "decoder",
+            "value": 728.1818181818181,
+            "importance": 30,
+            "priority": 1,
+            "criteria": [
+              {
+                "field": "decoder_confidence",
+                "value": 600,
+                "importance": 25,
+                "priority": 1
+              },
+              {
+                "field": "propagation_safety",
+                "value": 835,
+                "importance": 15,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "constant",
+              "value": 0,
+              "risk_scale": 1000
+            }
+          }
+        ],
+        "global_risk": {
+          "source": "field",
+          "field": "logical_risk",
+          "value": 56,
+          "risk_scale": 1000
+        },
+        "profile": "qldpc_formal_benchmark",
+        "public_operation": "structured_semantic_score",
+        "internal_formula_exposed": false
+      },
+      "_qdsv_feasible": true,
+      "_qdsv_rank": 1,
+      "_qdsv_score": 827.0672349090909,
+      "qdsv_selected_semantic": true,
+      "qdsv_selected_hardware": null,
+      "qruba_reliability_status": "not_available",
+      "qruba_accepted_as_reliable": null,
+      "qruba_final_decision": true,
+      "qdsv_selected_final_decision": true,
+      "qdsv_selected_decision_source": "semantic"
+    }
+  ],
+  "internal_formula_exposed": false
+}
