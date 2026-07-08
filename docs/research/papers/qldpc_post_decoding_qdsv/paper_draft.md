@@ -1,14 +1,14 @@
 # QDSV/QIntent as a Guarded Semantic Decision Layer for LDPC/qLDPC-Style Post-Decoding Correction Governance
 
-Working draft.
+Mature research draft.
 
 ## Abstract
 
-Quantum LDPC and qLDPC codes are promising candidates for scalable quantum error correction, but their practical value depends not only on code construction and decoder design. As correction pipelines scale, a second problem appears after decoding: when several correction hypotheses are plausible, uncertain or conflicting, which hypothesis should be trusted?
+Quantum LDPC and qLDPC codes are promising candidates for scalable quantum error correction, but scalable codes and stronger decoders do not remove a practical downstream question: when several correction hypotheses are plausible, uncertain or conflicting, which correction should be trusted?
 
-This paper evaluates QDSV/QIntent as a guarded semantic decision layer for post-decoding correction-hypothesis governance. QDSV/QIntent does not replace existing decoders. Instead, it receives decoder-generated candidates and prepared evidence signals, including syndrome consistency, decoder confidence, decoder agreement, logical-safety indicators, propagation safety and logical-risk proxies. It then performs structured candidate evaluation and returns an auditable decision trace without exposing the private QDSV scoring formula.
+This paper evaluates QDSV/QIntent as a guarded semantic decision layer for post-decoding correction-hypothesis governance. QDSV/QIntent does not replace belief propagation, BP+OSD, LSD, neural or soft-information decoders. Instead, it receives decoder-generated candidates and prepared evidence signals, including syndrome consistency, decoder confidence, decoder agreement, logical-safety indicators, propagation safety and logical-risk indicators. It then performs structured candidate evaluation and returns an auditable decision trace without exposing the private QDSV scoring formula.
 
-We report seven experimental stages. A controlled ambiguity benchmark demonstrates that QDSV/QIntent can select lower-risk correlated corrections when a minimum-weight baseline selects a risky singleton. A random sparse benchmark exposes cases where available evidence is insufficient and motivates richer decoder outputs. A BP-soft multi-seed benchmark over 480 scenarios shows that raw QDSV improves exact rate from 0.7708 to 0.7896 and reduces average logical risk from 141.12 to 110.80, while guarded QDSV reduces bad overrides from 5.83% to 1.46%. An external `ldpc` decoder-ensemble recovery benchmark uses real BP, BP+OSD and BP+LSD outputs. In 168 BP-failure scenarios, raw QDSV recovered exact corrections in 53.1% of cases, reduced the logical-failure proxy from 48.7% to 24.2%, and reduced average logical risk from 165.02 to 129.14. The guarded policy accepted fewer overrides but reduced bad overrides from 16.18% to 0.69% and eliminated worse-risk selections. A preliminary IBM Quantum hardware-oriented syndrome validation on `ibm_fez` shows that syndrome-count evidence from real hardware can be handed into the same QDSV/QIntent decision workflow; guarded QDSV rejected the raw override that sacrificed exactness in the `x1` scenario. Finally, two known stabilizer-code validations compute the formal residual `R = C E`. In 320 correctable single-error scenarios, the 5-qubit code baseline produced an 8.125% mean formal logical-failure rate while raw and guarded QDSV achieved 0%; in the Steane [[7,1,3]] CSS code, the baseline produced a 12.1875% mean formal logical-failure rate while raw and guarded QDSV again achieved 0%.
+We report seven experimental stages. A controlled ambiguity benchmark demonstrates risk-aware selection under constructed syndrome ambiguity. A BP-soft multi-seed benchmark over 480 scenarios shows that raw QDSV improves exact rate from 0.7708 to 0.7896 and reduces average logical risk from 141.12 to 110.80, while guarded QDSV reduces bad overrides from 5.83% to 1.46%. An external `ldpc` decoder-ensemble recovery benchmark uses BP, BP+OSD and BP+LSD outputs. In 168 BP-failure scenarios, raw QDSV recovered exact corrections in 53.1% of cases, reduced the logical-failure proxy from 48.7% to 24.2%, and reduced average logical risk from 165.02 to 129.14. Guarded QDSV accepted fewer overrides but reduced bad overrides from 16.18% to 0.69% and eliminated worse-risk selections. A preliminary IBM Quantum hardware-oriented syndrome validation on `ibm_fez` validates the handoff from hardware counts to QDSV/QIntent evidence. Finally, two known stabilizer-code validations compute the formal residual `R = C E`: in 320 correctable single-error scenarios, the 5-qubit code baseline produced an 8.125% mean formal logical-failure rate while raw and guarded QDSV achieved 0%; in the Steane [[7,1,3]] CSS code, the baseline produced a 12.1875% mean formal logical-failure rate while raw and guarded QDSV again achieved 0%.
 
 These results support the hypothesis that QDSV/QIntent can serve as a decoder-agnostic, guarded, auditable post-decoding decision layer validated across small stabilizer-code families. The results do not establish production decoder superiority, real-time suitability or quantum advantage. They identify a complementary role for semantic decision governance in decoder pipelines and motivate further evaluation with production qLDPC codes, larger stabilizer benchmarks and latency-aware implementations.
 
@@ -16,7 +16,9 @@ These results support the hypothesis that QDSV/QIntent can serve as a decoder-ag
 
 Quantum error correction is a central requirement for scalable quantum computing. LDPC and qLDPC-style codes are attractive because they promise improved overhead properties compared with many conventional approaches. However, scalable code construction alone is not enough. The decoding workflow must interpret noisy syndromes, manage ambiguity, select corrections, avoid logical failures and do so under practical latency and reliability constraints.
 
-Many decoders are optimized for likelihood, convergence, minimum weight, ordered-statistics search or localized statistics. These are essential mechanisms, but the final correction decision can still involve several competing criteria:
+Most decoding research focuses on producing better correction hypotheses: higher likelihood candidates, faster convergence, lower-weight corrections, ordered-statistics post-processing, localized inversion or learned neural inference. These are essential mechanisms. Yet a practical pipeline still faces a governance problem after candidate generation: if several hypotheses are plausible, if decoders disagree, or if confidence and logical risk point in different directions, the system must decide whether to accept, override, reject or defer a correction.
+
+The final correction decision can involve several competing criteria:
 
 - Does the candidate match the syndrome?
 - How confident is the decoder?
@@ -26,9 +28,28 @@ Many decoders are optimized for likelihood, convergence, minimum weight, ordered
 - Is it likely to preserve the logical subspace?
 - Can the decision be audited and reproduced?
 
-This work explores QDSV/QIntent in that decision-governance gap. QDSV provides a semantic representation layer for structured evidence. QIntent provides a public declarative syntax for expressing correction-hypothesis decision workflows. In the experiments reported here, QDSV/QIntent is evaluated primarily in the post-decoding phase: decoders generate candidates, and QDSV/QIntent governs whether a correction hypothesis should be accepted, rejected or overridden using structured evidence, risk-aware decision logic and guarded acceptance policies.
+This work explores QDSV/QIntent in that decision-governance gap. QDSV provides a semantic representation layer for structured evidence, building on the problem-first representation model introduced in [5] and its implementation/validation framework in [6]. QIntent provides a public declarative syntax for expressing correction-hypothesis decision workflows. In the experiments reported here, QDSV/QIntent is evaluated in the post-decoding phase: decoders generate candidates, and QDSV/QIntent governs whether a correction hypothesis should be accepted, rejected or overridden using structured evidence, risk-aware decision logic and guarded acceptance policies.
 
-## 2. Gap Analysis in LDPC/qLDPC Decoding
+The paper makes four focused contributions:
+
+1. It formulates post-decoding correction selection as a guarded semantic decision-governance problem rather than as a replacement decoder.
+2. It evaluates QDSV/QIntent over synthetic ambiguity, BP-soft evidence and external `ldpc` decoder outputs including BP, BP+OSD and BP+LSD.
+3. It introduces guarded override policies that reduce harmful overrides while preserving the ability to recover from baseline decoder failures.
+4. It validates logical preservation in two known stabilizer-code settings by computing the residual `R = C E` and classifying it against `S` and `N(S)\S`.
+
+The intended claim is deliberately narrow: QDSV/QIntent is a complementary post-decoding decision layer. It is not a new qLDPC code construction, not a replacement for BP/OSD/LSD/neural decoders, and not a claim of hardware fault tolerance.
+
+## 2. Related Work and Positioning
+
+Belief propagation is a natural baseline for sparse classical and quantum codes, but degeneracy, short cycles and ambiguous syndromes can limit standalone BP behavior in quantum LDPC settings. BP combined with ordered-statistics decoding has been studied as a general decoder for quantum LDPC codes and is implemented in the open `ldpc` ecosystem used by this work [1].
+
+Localized statistics decoding (LSD) was proposed as a parallel decoding approach for quantum LDPC codes, addressing scalability and runtime limitations of global BP+OSD-style post-processing while retaining broad applicability [2]. Neural decoders and learned approaches provide another line of work, targeting accuracy-latency tradeoffs and hardware deployability under real-time constraints [3]. Soft-information and soft-output approaches incorporate richer measurement or confidence information into decoding pipelines, improving the evidence available to the decoder rather than treating each syndrome bit as a hard decision [4].
+
+QDSV/QIntent is positioned differently. It does not attempt to replace BP, BP+OSD, LSD, neural or soft-information decoders. It operates after candidate generation, using decoder outputs and auxiliary evidence as inputs to a guarded decision layer. In this framing, decoders answer "what corrections are plausible?", while QDSV/QIntent addresses "which plausible correction should be trusted under the current evidence, risk and guard policy?".
+
+This distinction matters because a post-decoding decision layer can be evaluated using metrics that are not identical to decoder accuracy alone: harmful override rate, successful override rate, evidence-insufficiency rate, risk delta, audit trace completeness and formal residual classification in known stabilizer codes.
+
+## 3. Gap Analysis in LDPC/qLDPC Decoding
 
 This paper focuses on practical gaps in the decoding workflow rather than proposing a new code family.
 
@@ -49,9 +70,9 @@ Overall estimated coverage of the current work: approximately 72-80% of the broa
 
 Coverage of the post-decoding decision subproblem: approximately 78-85%.
 
-The next execution target is not only to improve one row. The target is to raise every weak row at least one level: hardware evidence, latency instrumentation, explicit logical checks, richer uncertainty flags and one better-defined code structure.
+The remaining gaps are no longer addressed by adding more synthetic benchmarks. They require a different validation tier: larger known code families, repeated hardware-derived syndrome evidence, latency-aware implementation and production qLDPC-scale comparisons.
 
-## 3. QDSV/QIntent Post-Decoding Model
+## 4. QDSV/QIntent Post-Decoding Model
 
 The proposed workflow is:
 
@@ -104,7 +125,7 @@ The POST contribution is not limited to candidate re-ranking. It provides a stru
 | Guarded decision policy | Prevents the decision layer from degrading a reliable baseline decoder through controlled acceptance and override rules. |
 | Traceability | Produces auditable evidence about the reasons and signals associated with the final correction selection. |
 
-## 4. Methodology
+## 5. Methodology
 
 Seven experiments were conducted.
 
@@ -230,9 +251,9 @@ R in N(S)\S   -> formal logical failure
 
 This experiment adds CSS-sector evidence but keeps the same public QIntent pattern: syndrome evidence, logical-safety evidence, decoder evidence and guarded override policy.
 
-## 5. Experimental Results
+## 6. Experimental Results
 
-### 5.1 Controlled Ambiguity Benchmark
+### 6.1 Controlled Ambiguity Benchmark
 
 | Metric | Baseline | QDSV/QIntent |
 |---|---:|---:|
@@ -243,13 +264,13 @@ This experiment adds CSS-sector evidence but keeps the same public QIntent patte
 
 Interpretation: QDSV/QIntent successfully selected the lower-risk correlated correction in the constructed ambiguity.
 
-### 5.2 Random Sparse Benchmark
+### 6.2 Random Sparse Benchmark
 
 The random sparse benchmark showed that aggressive risk-first scoring can reduce risk but may sacrifice exactness, while balanced policies preserve more decoder agreement. The ambiguity audit identified cases that cannot be resolved from the available synthetic evidence alone.
 
 Interpretation: QDSV/QIntent should not be tuned only as a risk minimizer. It needs richer decoder evidence and policy calibration.
 
-### 5.3 BP-Soft Multi-Seed Benchmark
+### 6.3 BP-Soft Multi-Seed Benchmark
 
 Configuration:
 
@@ -281,7 +302,7 @@ Interpretation: raw QDSV/QIntent provided stable risk reduction across seeds wit
 
 The added timing and uncertainty instrumentation shows that this configuration is not yet a real-time decoder implementation, but the QDSV scoring step itself is small relative to candidate generation. The evidence-insufficient flag rate also provides a reproducible way to identify cases where the available signals may be too weak for a confident correction decision.
 
-### 5.4 External `ldpc` Decoder-Ensemble Recovery
+### 6.4 External `ldpc` Decoder-Ensemble Recovery
 
 Configuration:
 
@@ -313,7 +334,7 @@ Interpretation: when BP fails, raw QDSV/QIntent can recover exact corrections in
 
 This experiment also provides the strongest latency-oriented evidence so far. The local QDSV decision step is sub-millisecond on average in this configuration, while the total local policy path remains around 10.89 ms per accepted BP-failure scenario. This is not a real-time hardware decoder claim, but it narrows the latency gap from "untested" to "instrumented offline baseline".
 
-### 5.5 IBM Hardware-Oriented Syndrome Validation
+### 6.5 IBM Hardware-Oriented Syndrome Validation
 
 Configuration:
 
@@ -342,7 +363,7 @@ Raw QDSV/QIntent reduced average logical-risk proxy from 123.75 to 70.00. Howeve
 
 Interpretation: the IBM run validates the hardware-evidence handoff and improves the hardware/readout gap. It does not yet validate production qLDPC decoding or full logical-operator preservation.
 
-### 5.6 Known 5-Qubit Stabilizer-Code Logical Validation
+### 6.6 Known 5-Qubit Stabilizer-Code Logical Validation
 
 Configuration:
 
@@ -374,7 +395,7 @@ Interpretation: this experiment closes the main causal gap left by proxy-only lo
 
 This result should be interpreted narrowly. It does not prove production qLDPC decoder superiority, and it uses a small correctable-code setting. Its contribution is to demonstrate that QDSV/QIntent decision governance can be evaluated against formal logical-success and logical-failure conditions, not only heuristic risk proxies.
 
-### 5.7 Steane [[7,1,3]] CSS Logical Validation
+### 6.7 Steane [[7,1,3]] CSS Logical Validation
 
 Configuration:
 
@@ -406,7 +427,7 @@ Interpretation: the Steane experiment reproduces the formal logical-preservation
 
 The scientific value is not that QDSV is perfect in this small setting. The value is cross-code consistency: the same decision-governance pattern that worked in the 5-qubit stabilizer code also worked in a CSS code with explicit X/Z stabilizer structure. This reduces the risk that the formal logical-preservation result is an artifact of a single code.
 
-## 6. Discussion
+## 7. Discussion
 
 The strongest contribution of QDSV/QIntent in these experiments is not replacing a decoder. The contribution is guarded semantic governance over decoder outputs.
 
@@ -429,20 +450,22 @@ decoder candidate generation
 -> reproducible decision trace
 ```
 
-## 7. Limitations
+## 8. Limitations
 
 This work remains preliminary.
 
 Limitations:
 
-- The check matrices are sparse synthetic LDPC/qLDPC-style structures.
-- Most LDPC/qLDPC-style benchmarks still use logical-risk proxies; formal residual classification has so far been demonstrated only on small 5-qubit and Steane CSS stabilizer-code benchmarks.
-- The experiments are offline and do not evaluate real-time latency.
-- The external `ldpc` experiment focuses on BP-failure recovery and does not claim superiority over BP+OSD itself.
-- Raw QDSV can still produce bad overrides; guarded QDSV reduces but does not mathematically eliminate all bad override risk.
-- The IBM hardware-oriented run is intentionally small and validates handoff from hardware syndrome counts, not production qLDPC decoding.
+- The LDPC/qLDPC-style check matrices are sparse synthetic structures; they are useful for controlled decision-governance tests but are not production qLDPC code families.
+- Formal residual classification has so far been demonstrated only on small correctable single-error settings: the 5-qubit perfect stabilizer code and the Steane [[7,1,3]] CSS code.
+- The experiments do not demonstrate scalability to large qLDPC codes, repeated syndrome extraction cycles or full fault-tolerant operation.
+- The experiments are offline and do not establish real-time decoding suitability, even though local QDSV decision timing is instrumented.
+- The external `ldpc` experiment focuses on BP-failure recovery and does not claim superiority over BP+OSD or BP+LSD as standalone decoders.
+- Raw QDSV can still produce harmful overrides in some settings; guarded QDSV reduces but does not mathematically eliminate all bad override risk.
+- The IBM hardware-oriented run is intentionally small and validates handoff from hardware syndrome counts, not hardware fault tolerance or production qLDPC decoding.
+- The `oracle_best` rows are upper-bound references over available candidate sets. They are not deployable baselines and are not part of the proposed method.
 
-## 8. Future Work
+## 9. Future Work
 
 Before submission to a stronger venue, the most important next steps are:
 
@@ -453,7 +476,7 @@ Before submission to a stronger venue, the most important next steps are:
 5. Evaluate noisy syndrome/readout conditions using `SoftInfoBpDecoder` or related workflows.
 6. Compare against BP+OSD/BP+LSD as baselines, while keeping the claim focused on post-decoding policy rather than decoder replacement.
 
-### 8.1 Hardware-Oriented Validation Status
+### 9.1 Hardware-Oriented Validation Status
 
 The first IBM hardware-oriented syndrome experiment has been executed. The goal was not to claim production qLDPC decoding, but to validate the handoff:
 
@@ -475,7 +498,7 @@ The notebook runs first on Aer, then optionally on IBM Quantum hardware using a 
 
 The executed `ibm_fez` job supports a cautious paper statement: QDSV/QIntent can consume hardware-derived syndrome-count evidence and produce the same kind of auditable post-decoding candidate ranking already demonstrated in local and external-decoder benchmarks. The next hardware step is repetition across more scenarios or another backend.
 
-## 9. Reproducibility
+## 10. Reproducibility
 
 Evidence and scripts are archived in the QIntent repository.
 
@@ -521,7 +544,7 @@ docs/research/evidence/qdsv_qldpc_steane_css_logical_summary.csv
 docs/research/evidence/qdsv_qldpc_steane_css_logical_metrics.csv
 ```
 
-## 10. Conclusion
+## 11. Conclusion
 
 This paper evaluates QDSV/QIntent as a risk-aware post-decoding semantic decision layer for LDPC/qLDPC-style quantum error correction workflows.
 
@@ -532,3 +555,17 @@ The strongest decoder-ensemble result is the external `ldpc` recovery benchmark:
 The strongest logical-preservation result is now cross-code consistency across two stabilizer families. In the 5-qubit stabilizer-code benchmark, over 320 correctable single-error scenarios, the confidence baseline produced an 8.125% mean formal logical-failure rate, while raw and guarded QDSV/QIntent selected corrections with 0% formal logical-failure rate. In the Steane [[7,1,3]] CSS benchmark, the confidence baseline produced a 12.1875% mean formal logical-failure rate, while raw and guarded QDSV/QIntent again selected corrections with 0% formal logical-failure rate. In both cases, QDSV matched the oracle-best candidate set under residual classification `R = C E`.
 
 The work does not claim a new qLDPC decoder, production readiness or quantum advantage. It contributes evidence for a complementary semantic decision-governance layer that can sit after existing decoders and support risk-aware, auditable and conservative correction-hypothesis selection.
+
+## 12. References
+
+[1] J. Roffe, D. R. White, S. Burton, and E. Campbell, "Decoding Across the Quantum LDPC Code Landscape", arXiv:2005.07016. https://arxiv.org/abs/2005.07016
+
+[2] T. Hillmann, L. Berent, A. O. Quintavalle, J. Eisert, R. Wille, and J. Roffe, "Localized statistics decoding: A parallel decoding algorithm for quantum low-density parity-check codes", arXiv:2406.18655. https://arxiv.org/abs/2406.18655
+
+[3] G. Yan, S. Li, and Y. Du, "Rethink the Role of Neural Decoders in Quantum Error Correction", arXiv:2605.12046. https://arxiv.org/abs/2605.12046
+
+[4] J. Majaniemi and E. S. Matekole, "Reducing quantum error correction overhead using soft information", arXiv:2504.03504. https://arxiv.org/abs/2504.03504
+
+[5] J. A. Jimenez Lozano, "QDSV: A Problem-First Semantic Representation Model for Quantum-Oriented Computation", arXiv:2606.15027. https://arxiv.org/abs/2606.15027
+
+[6] J. A. Jimenez Lozano, "QDSV Implementation and Validation Framework", arXiv:2606.19312. https://arxiv.org/abs/2606.19312
