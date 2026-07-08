@@ -251,6 +251,28 @@ Before submission to a stronger venue, the most important next steps are:
 5. Evaluate noisy syndrome/readout conditions using `SoftInfoBpDecoder` or related workflows.
 6. Compare against BP+OSD/BP+LSD as baselines, while keeping the claim focused on post-decoding policy rather than decoder replacement.
 
+### 8.1 Hardware-Oriented Validation Readiness
+
+The next immediate validation step is a small IBM hardware-oriented syndrome experiment. The goal is not to claim production qLDPC decoding, but to validate the handoff:
+
+```text
+IBM hardware counts
+-> syndrome evidence
+-> candidate correction hypotheses
+-> QDSV/QIntent post-decoding ranking
+-> reproducible audit evidence
+```
+
+A Colab-ready notebook has been prepared for this step:
+
+```text
+notebooks/qldpc_ibm_hardware_syndrome_validation_colab.ipynb
+```
+
+The notebook runs first on Aer, then optionally on IBM Quantum hardware using a user-supplied IBM token. The QDSV/QIntent side does not require a QDSV API key for this public workflow.
+
+If successful, this validation can support a cautious paper statement: QDSV/QIntent can consume hardware-derived syndrome-count evidence and produce the same kind of auditable post-decoding candidate ranking already demonstrated in local and external-decoder benchmarks.
+
 ## 9. Reproducibility
 
 Evidence and scripts are archived in the QIntent repository.
@@ -260,6 +282,13 @@ Scripts:
 ```text
 docs/research/scripts/qldpc_bp_soft_multiseed.py
 docs/research/scripts/qldpc_ldpc_ensemble_recovery.py
+```
+
+Hardware-oriented validation plan:
+
+```text
+docs/research/papers/qldpc_post_decoding_qdsv/ibm_hardware_validation_plan.md
+notebooks/qldpc_ibm_hardware_syndrome_validation_colab.ipynb
 ```
 
 Evidence:
@@ -286,4 +315,3 @@ The results support a focused conclusion: QDSV/QIntent can organize decoder-gene
 The most important result is the external `ldpc` ensemble recovery benchmark: in 168 BP-failure scenarios, QDSV/QIntent recovered exact corrections in 53.1% of cases and reduced the logical-failure proxy from 48.7% to 24.2%.
 
 The work does not claim a new qLDPC decoder, production readiness or quantum advantage. It contributes evidence for a complementary semantic decision layer that can sit after existing decoders and support risk-aware, auditable correction selection.
-
