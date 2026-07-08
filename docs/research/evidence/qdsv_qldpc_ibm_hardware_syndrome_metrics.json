@@ -1,0 +1,21 @@
+{
+  "experiment": "qldpc_ibm_hardware_syndrome_validation",
+  "source": "ibm",
+  "shots": 1024,
+  "run_ibm_hardware": true,
+  "ibm_backend_name": "ibm_fez",
+  "ibm_job_id": "d977en52su3c739horng",
+  "scenario_count": 4,
+  "observed_syndrome_match_rate": 1.0,
+  "avg_expected_probability": 0.957275390625,
+  "avg_off_expected_probability": 0.042724609375,
+  "baseline_exact_rate": 1.0,
+  "qdsv_exact_rate": 0.75,
+  "baseline_failure_proxy_rate": 0.0,
+  "qdsv_failure_proxy_rate": 0.0,
+  "baseline_avg_logical_risk": 123.75,
+  "qdsv_avg_logical_risk": 70.0,
+  "avg_risk_delta": 53.75,
+  "improved_risk_count": 1,
+  "worse_risk_count": 0
+}

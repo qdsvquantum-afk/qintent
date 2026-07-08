@@ -1,0 +1,685 @@
+{
+  "experiment": "qldpc_ibm_hardware_syndrome_validation",
+  "source": "ibm",
+  "shots": 1024,
+  "run_ibm_hardware": true,
+  "ibm_backend_name": "ibm_fez",
+  "ibm_job_id": "d977en52su3c739horng",
+  "scenarios": [
+    {
+      "scenario_id": 0,
+      "true_error": [],
+      "label": "no_error",
+      "expected_syndrome": "00",
+      "aer_counts": {
+        "00": 1024
+      },
+      "aer_observed_syndrome": "00",
+      "aer_observed_probability": 1.0,
+      "ibm_counts": {
+        "00": 984,
+        "10": 20,
+        "01": 19,
+        "11": 1
+      },
+      "ibm_observed_syndrome": "00",
+      "ibm_observed_probability": 0.9609375
+    },
+    {
+      "scenario_id": 1,
+      "true_error": [
+        0
+      ],
+      "label": "x0",
+      "expected_syndrome": "01",
+      "aer_counts": {
+        "01": 1024
+      },
+      "aer_observed_syndrome": "01",
+      "aer_observed_probability": 1.0,
+      "ibm_counts": {
+        "01": 977,
+        "00": 29,
+        "11": 17,
+        "10": 1
+      },
+      "ibm_observed_syndrome": "01",
+      "ibm_observed_probability": 0.9541015625
+    },
+    {
+      "scenario_id": 2,
+      "true_error": [
+        1
+      ],
+      "label": "x1",
+      "expected_syndrome": "11",
+      "aer_counts": {
+        "11": 1024
+      },
+      "aer_observed_syndrome": "11",
+      "aer_observed_probability": 1.0,
+      "ibm_counts": {
+        "11": 978,
+        "01": 26,
+        "10": 19,
+        "00": 1
+      },
+      "ibm_observed_syndrome": "11",
+      "ibm_observed_probability": 0.955078125
+    },
+    {
+      "scenario_id": 3,
+      "true_error": [
+        2
+      ],
+      "label": "x2",
+      "expected_syndrome": "10",
+      "aer_counts": {
+        "10": 1024
+      },
+      "aer_observed_syndrome": "10",
+      "aer_observed_probability": 1.0,
+      "ibm_counts": {
+        "10": 982,
+        "11": 20,
+        "00": 22
+      },
+      "ibm_observed_syndrome": "10",
+      "ibm_observed_probability": 0.958984375
+    }
+  ],
+  "qintent_source": "\nfind_rows(\"candidate_index\")\n  .using_structured_semantic_score([\n      block(\"syndrome\", [\n          signal(\"syndrome_support\", influence=30, priority=2),\n          signal(\"check_consistency\", influence=20, priority=1),\n      ], influence=30, priority=2, risk_adjustment=\"syndrome_risk\", adjustments=[\n          adjustment(\"syndrome_entropy_adjustment\", influence=5),\n      ]),\n      block(\"logical_safety\", [\n          signal(\"logical_preservation\", influence=40, priority=3),\n          signal(\"distance_safety\", influence=20, priority=2),\n      ], influence=40, priority=3, risk_adjustment=\"logical_risk\"),\n      block(\"decoder\", [\n          signal(\"decoder_confidence\", influence=25, priority=1),\n          signal(\"propagation_safety\", influence=15, priority=2),\n      ], influence=30, priority=1),\n  ], global_risk=\"logical_risk\", profile=\"qldpc_ibm_hardware_syndrome_validation\")\n  .accept_if(threshold=600)\n  .rank()\n  .top_k(1)\n",
+  "summary": [
+    {
+      "scenario_id": 0,
+      "label": "no_error",
+      "source": "ibm",
+      "expected_syndrome": "00",
+      "observed_syndrome": "00",
+      "baseline_qubits": "none",
+      "baseline_confidence": 960,
+      "baseline_logical_risk": 45,
+      "baseline_exact": true,
+      "baseline_failure_proxy": false,
+      "qdsv_qubits": "none",
+      "qdsv_confidence": 960,
+      "qdsv_logical_risk": 45,
+      "qdsv_exact": true,
+      "qdsv_failure_proxy": false,
+      "risk_delta": 0
+    },
+    {
+      "scenario_id": 1,
+      "label": "x0",
+      "source": "ibm",
+      "expected_syndrome": "01",
+      "observed_syndrome": "01",
+      "baseline_qubits": "0",
+      "baseline_confidence": 820,
+      "baseline_logical_risk": 70,
+      "baseline_exact": true,
+      "baseline_failure_proxy": false,
+      "qdsv_qubits": "0",
+      "qdsv_confidence": 820,
+      "qdsv_logical_risk": 70,
+      "qdsv_exact": true,
+      "qdsv_failure_proxy": false,
+      "risk_delta": 0
+    },
+    {
+      "scenario_id": 2,
+      "label": "x1",
+      "source": "ibm",
+      "expected_syndrome": "11",
+      "observed_syndrome": "11",
+      "baseline_qubits": "1",
+      "baseline_confidence": 821,
+      "baseline_logical_risk": 310,
+      "baseline_exact": true,
+      "baseline_failure_proxy": false,
+      "qdsv_qubits": "0 2",
+      "qdsv_confidence": 687,
+      "qdsv_logical_risk": 95,
+      "qdsv_exact": false,
+      "qdsv_failure_proxy": false,
+      "risk_delta": 215
+    },
+    {
+      "scenario_id": 3,
+      "label": "x2",
+      "source": "ibm",
+      "expected_syndrome": "10",
+      "observed_syndrome": "10",
+      "baseline_qubits": "2",
+      "baseline_confidence": 824,
+      "baseline_logical_risk": 70,
+      "baseline_exact": true,
+      "baseline_failure_proxy": false,
+      "qdsv_qubits": "2",
+      "qdsv_confidence": 824,
+      "qdsv_logical_risk": 70,
+      "qdsv_exact": true,
+      "qdsv_failure_proxy": false,
+      "risk_delta": 0
+    }
+  ],
+  "selected_rows": [
+    {
+      "scenario_id": 0,
+      "label": "no_error",
+      "candidate_index": 0,
+      "correction_qubits": "none",
+      "candidate_weight": 0,
+      "observed_syndrome": "00",
+      "predicted_syndrome": "00",
+      "syndrome_support": 960,
+      "check_consistency": 1000,
+      "logical_preservation": 950,
+      "distance_safety": 930,
+      "decoder_confidence": 960,
+      "propagation_safety": 940,
+      "syndrome_risk": 35,
+      "logical_risk": 45,
+      "syndrome_entropy_adjustment": -15,
+      "exact_correction": true,
+      "logical_failure_proxy": false,
+      "_qdsv_structured_semantic_score": 877.1870650974026,
+      "_qdsv_selected": true,
+      "_qdsv_decision_model": {
+        "selected": true,
+        "value": 877.1870650974026,
+        "decision": "gte",
+        "threshold": 600,
+        "blocks": [
+          {
+            "name": "syndrome",
+            "value": 935.32625,
+            "importance": 30,
+            "priority": 2,
+            "criteria": [
+              {
+                "field": "syndrome_support",
+                "value": 960,
+                "importance": 30,
+                "priority": 2
+              },
+              {
+                "field": "check_consistency",
+                "value": 1000,
+                "importance": 20,
+                "priority": 1
+              }
+            ],
+            "adjustments": [
+              {
+                "field": "syndrome_entropy_adjustment",
+                "value": -15,
+                "influence": 5
+              }
+            ],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "syndrome_risk",
+              "value": 35,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "logical_safety",
+            "value": 902.475,
+            "importance": 40,
+            "priority": 3,
+            "criteria": [
+              {
+                "field": "logical_preservation",
+                "value": 950,
+                "importance": 40,
+                "priority": 3
+              },
+              {
+                "field": "distance_safety",
+                "value": 930,
+                "importance": 20,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "logical_risk",
+              "value": 45,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "decoder",
+            "value": 949.0909090909091,
+            "importance": 30,
+            "priority": 1,
+            "criteria": [
+              {
+                "field": "decoder_confidence",
+                "value": 960,
+                "importance": 25,
+                "priority": 1
+              },
+              {
+                "field": "propagation_safety",
+                "value": 940,
+                "importance": 15,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "constant",
+              "value": 0,
+              "risk_scale": 1000
+            }
+          }
+        ],
+        "global_risk": {
+          "source": "field",
+          "field": "logical_risk",
+          "value": 45,
+          "risk_scale": 1000
+        },
+        "profile": "qldpc_ibm_hardware_syndrome_validation",
+        "public_operation": "structured_semantic_score",
+        "internal_formula_exposed": false
+      },
+      "_qdsv_feasible": true,
+      "_qdsv_rank": 1,
+      "_qdsv_score": 877.1870650974026
+    },
+    {
+      "scenario_id": 1,
+      "label": "x0",
+      "candidate_index": 1,
+      "correction_qubits": "0",
+      "candidate_weight": 1,
+      "observed_syndrome": "01",
+      "predicted_syndrome": "01",
+      "syndrome_support": 954,
+      "check_consistency": 1000,
+      "logical_preservation": 905,
+      "distance_safety": 890,
+      "decoder_confidence": 820,
+      "propagation_safety": 850,
+      "syndrome_risk": 55,
+      "logical_risk": 70,
+      "syndrome_entropy_adjustment": 18,
+      "exact_correction": true,
+      "logical_failure_proxy": false,
+      "_qdsv_structured_semantic_score": 799.2034231168831,
+      "_qdsv_selected": true,
+      "_qdsv_decision_model": {
+        "selected": true,
+        "value": 799.2034231168831,
+        "decision": "gte",
+        "threshold": 600,
+        "blocks": [
+          {
+            "name": "syndrome",
+            "value": 913.248,
+            "importance": 30,
+            "priority": 2,
+            "criteria": [
+              {
+                "field": "syndrome_support",
+                "value": 954,
+                "importance": 30,
+                "priority": 2
+              },
+              {
+                "field": "check_consistency",
+                "value": 1000,
+                "importance": 20,
+                "priority": 1
+              }
+            ],
+            "adjustments": [
+              {
+                "field": "syndrome_entropy_adjustment",
+                "value": 18,
+                "influence": 5
+              }
+            ],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "syndrome_risk",
+              "value": 55,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "logical_safety",
+            "value": 838.1625,
+            "importance": 40,
+            "priority": 3,
+            "criteria": [
+              {
+                "field": "logical_preservation",
+                "value": 905,
+                "importance": 40,
+                "priority": 3
+              },
+              {
+                "field": "distance_safety",
+                "value": 890,
+                "importance": 20,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "logical_risk",
+              "value": 70,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "decoder",
+            "value": 836.3636363636364,
+            "importance": 30,
+            "priority": 1,
+            "criteria": [
+              {
+                "field": "decoder_confidence",
+                "value": 820,
+                "importance": 25,
+                "priority": 1
+              },
+              {
+                "field": "propagation_safety",
+                "value": 850,
+                "importance": 15,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "constant",
+              "value": 0,
+              "risk_scale": 1000
+            }
+          }
+        ],
+        "global_risk": {
+          "source": "field",
+          "field": "logical_risk",
+          "value": 70,
+          "risk_scale": 1000
+        },
+        "profile": "qldpc_ibm_hardware_syndrome_validation",
+        "public_operation": "structured_semantic_score",
+        "internal_formula_exposed": false
+      },
+      "_qdsv_feasible": true,
+      "_qdsv_rank": 1,
+      "_qdsv_score": 799.2034231168831
+    },
+    {
+      "scenario_id": 2,
+      "label": "x1",
+      "candidate_index": 5,
+      "correction_qubits": "0 2",
+      "candidate_weight": 2,
+      "observed_syndrome": "11",
+      "predicted_syndrome": "11",
+      "syndrome_support": 955,
+      "check_consistency": 1000,
+      "logical_preservation": 860,
+      "distance_safety": 850,
+      "decoder_confidence": 687,
+      "propagation_safety": 760,
+      "syndrome_risk": 75,
+      "logical_risk": 95,
+      "syndrome_entropy_adjustment": 18,
+      "exact_correction": false,
+      "logical_failure_proxy": false,
+      "_qdsv_structured_semantic_score": 726.6110131493507,
+      "_qdsv_selected": true,
+      "_qdsv_decision_model": {
+        "selected": true,
+        "value": 726.6110131493507,
+        "decision": "gte",
+        "threshold": 600,
+        "blocks": [
+          {
+            "name": "syndrome",
+            "value": 894.61375,
+            "importance": 30,
+            "priority": 2,
+            "criteria": [
+              {
+                "field": "syndrome_support",
+                "value": 955,
+                "importance": 30,
+                "priority": 2
+              },
+              {
+                "field": "check_consistency",
+                "value": 1000,
+                "importance": 20,
+                "priority": 1
+              }
+            ],
+            "adjustments": [
+              {
+                "field": "syndrome_entropy_adjustment",
+                "value": 18,
+                "influence": 5
+              }
+            ],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "syndrome_risk",
+              "value": 75,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "logical_safety",
+            "value": 776.0375,
+            "importance": 40,
+            "priority": 3,
+            "criteria": [
+              {
+                "field": "logical_preservation",
+                "value": 860,
+                "importance": 40,
+                "priority": 3
+              },
+              {
+                "field": "distance_safety",
+                "value": 850,
+                "importance": 20,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "logical_risk",
+              "value": 95,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "decoder",
+            "value": 726.8181818181819,
+            "importance": 30,
+            "priority": 1,
+            "criteria": [
+              {
+                "field": "decoder_confidence",
+                "value": 687,
+                "importance": 25,
+                "priority": 1
+              },
+              {
+                "field": "propagation_safety",
+                "value": 760,
+                "importance": 15,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "constant",
+              "value": 0,
+              "risk_scale": 1000
+            }
+          }
+        ],
+        "global_risk": {
+          "source": "field",
+          "field": "logical_risk",
+          "value": 95,
+          "risk_scale": 1000
+        },
+        "profile": "qldpc_ibm_hardware_syndrome_validation",
+        "public_operation": "structured_semantic_score",
+        "internal_formula_exposed": false
+      },
+      "_qdsv_feasible": true,
+      "_qdsv_rank": 1,
+      "_qdsv_score": 726.6110131493507
+    },
+    {
+      "scenario_id": 3,
+      "label": "x2",
+      "candidate_index": 3,
+      "correction_qubits": "2",
+      "candidate_weight": 1,
+      "observed_syndrome": "10",
+      "predicted_syndrome": "10",
+      "syndrome_support": 958,
+      "check_consistency": 1000,
+      "logical_preservation": 905,
+      "distance_safety": 890,
+      "decoder_confidence": 824,
+      "propagation_safety": 850,
+      "syndrome_risk": 55,
+      "logical_risk": 70,
+      "syndrome_entropy_adjustment": 18,
+      "exact_correction": true,
+      "logical_failure_proxy": false,
+      "_qdsv_structured_semantic_score": 800.1982815584415,
+      "_qdsv_selected": true,
+      "_qdsv_decision_model": {
+        "selected": true,
+        "value": 800.1982815584415,
+        "decision": "gte",
+        "threshold": 600,
+        "blocks": [
+          {
+            "name": "syndrome",
+            "value": 916.083,
+            "importance": 30,
+            "priority": 2,
+            "criteria": [
+              {
+                "field": "syndrome_support",
+                "value": 958,
+                "importance": 30,
+                "priority": 2
+              },
+              {
+                "field": "check_consistency",
+                "value": 1000,
+                "importance": 20,
+                "priority": 1
+              }
+            ],
+            "adjustments": [
+              {
+                "field": "syndrome_entropy_adjustment",
+                "value": 18,
+                "influence": 5
+              }
+            ],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "syndrome_risk",
+              "value": 55,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "logical_safety",
+            "value": 838.1625,
+            "importance": 40,
+            "priority": 3,
+            "criteria": [
+              {
+                "field": "logical_preservation",
+                "value": 905,
+                "importance": 40,
+                "priority": 3
+              },
+              {
+                "field": "distance_safety",
+                "value": 890,
+                "importance": 20,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "field",
+              "field": "logical_risk",
+              "value": 70,
+              "risk_scale": 1000
+            }
+          },
+          {
+            "name": "decoder",
+            "value": 838.1818181818181,
+            "importance": 30,
+            "priority": 1,
+            "criteria": [
+              {
+                "field": "decoder_confidence",
+                "value": 824,
+                "importance": 25,
+                "priority": 1
+              },
+              {
+                "field": "propagation_safety",
+                "value": 850,
+                "importance": 15,
+                "priority": 2
+              }
+            ],
+            "adjustments": [],
+            "risk_adjustment": {
+              "source": "constant",
+              "value": 0,
+              "risk_scale": 1000
+            }
+          }
+        ],
+        "global_risk": {
+          "source": "field",
+          "field": "logical_risk",
+          "value": 70,
+          "risk_scale": 1000
+        },
+        "profile": "qldpc_ibm_hardware_syndrome_validation",
+        "public_operation": "structured_semantic_score",
+        "internal_formula_exposed": false
+      },
+      "_qdsv_feasible": true,
+      "_qdsv_rank": 1,
+      "_qdsv_score": 800.1982815584415
+    }
+  ],
+  "notes": [
+    "This validates the handoff from simulator/hardware syndrome counts to QDSV/QIntent post-decoding candidate ranking.",
+    "This is a small parity-check hardware-oriented validation, not a production qLDPC decoder.",
+    "The private QDSV scoring formula is not exposed in the public evidence."
+  ]
+}

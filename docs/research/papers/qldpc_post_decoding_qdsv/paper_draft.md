@@ -8,7 +8,7 @@ Quantum LDPC and qLDPC codes are promising candidates for scalable quantum error
 
 This paper evaluates QDSV/QIntent as a post-decoding semantic decision layer over LDPC/qLDPC-style correction candidates. QDSV/QIntent does not replace existing decoders. Instead, it receives decoder-generated candidates and prepared evidence signals, including syndrome consistency, decoder confidence, decoder agreement, logical-safety indicators, propagation safety and logical-risk proxies. It then performs structured candidate ranking and returns an auditable decision trace without exposing the private QDSV scoring formula.
 
-We report four experimental stages. A controlled ambiguity benchmark demonstrates that QDSV/QIntent can select lower-risk correlated corrections when a minimum-weight baseline selects a risky singleton. A random sparse benchmark exposes cases where available evidence is insufficient and motivates richer decoder outputs. A BP-soft multi-seed benchmark over 480 scenarios shows stable logical-risk reduction, reducing average logical risk from 141.12 to 110.80 with 74 improved-risk selections and no worse-risk selections under that configuration. Finally, an external `ldpc` decoder-ensemble recovery benchmark uses real BP, BP+OSD and BP+LSD outputs. In 168 BP-failure scenarios, QDSV/QIntent recovered exact corrections in 53.1% of cases, reduced the logical-failure proxy from 48.7% to 24.2%, and reduced average logical risk from 165.02 to 129.14.
+We report five experimental stages. A controlled ambiguity benchmark demonstrates that QDSV/QIntent can select lower-risk correlated corrections when a minimum-weight baseline selects a risky singleton. A random sparse benchmark exposes cases where available evidence is insufficient and motivates richer decoder outputs. A BP-soft multi-seed benchmark over 480 scenarios shows stable logical-risk reduction, reducing average logical risk from 141.12 to 110.80 with 74 improved-risk selections and no worse-risk selections under that configuration. An external `ldpc` decoder-ensemble recovery benchmark uses real BP, BP+OSD and BP+LSD outputs. In 168 BP-failure scenarios, QDSV/QIntent recovered exact corrections in 53.1% of cases, reduced the logical-failure proxy from 48.7% to 24.2%, and reduced average logical risk from 165.02 to 129.14. Finally, a preliminary IBM Quantum hardware-oriented syndrome validation on `ibm_fez` shows that syndrome-count evidence from real hardware can be handed into the same QDSV/QIntent ranking workflow.
 
 These results support the hypothesis that QDSV/QIntent can serve as a risk-aware, auditable post-decoding decision layer for LDPC/qLDPC-style workflows. The results do not establish production decoder superiority, real-time suitability or quantum advantage. They identify a complementary role for semantic decision logic in decoder pipelines and motivate further evaluation with production qLDPC codes, full logical-operator analysis and latency-aware implementations.
 
@@ -38,14 +38,14 @@ This paper focuses on practical gaps in the decoding workflow rather than propos
 | Candidate selection under competing criteria | The highest-confidence or minimum-weight correction may not be the safest correction. | Re-ranks candidates using structured evidence, confidence, agreement, risk and safety signals. | Add guarded policy tests over larger multi-seed decoder-ensemble outputs. | ~70% | ~78% |
 | Risk-aware correction choice | A locally plausible correction can be structurally risky or logical-sensitive. | Adds logical-risk, propagation-safety, distance-safety and logical-preservation proxies. | Replace part of the proxy logic with explicit logical-observable or stabilizer-derived sensitivity features. | ~65% | ~75% |
 | Decoder disagreement | BP, BP+OSD, BP+LSD or alternative methods may produce different corrections. | Treats decoder outputs as an ensemble and selects across them using method reliability and evidence. | Compare QDSV policy against BP-only, BP+OSD-preferred, BP+LSD-preferred and oracle-best ensemble baselines. | ~55% | ~70% |
-| Auditability and reproducibility | Decoder decisions often lack a structured, human-readable decision trace. | Produces public block-level evidence and reproducible JSON/CSV traces. | Add hardware job metadata, backend name, counts and selected policy trace to evidence artifacts. | ~80% | ~88% |
-| Evidence insufficiency detection | Some cases cannot be resolved with the available signals. | Ambiguity audit now includes low-margin, decoder-disagreement and evidence-insufficient flags in benchmark outputs. | Add syndrome-count dispersion after IBM hardware execution. | ~60% | ~70% |
+| Auditability and reproducibility | Decoder decisions often lack a structured, human-readable decision trace. | Produces public block-level evidence, reproducible JSON/CSV traces and IBM job/backend metadata. | Add repeated hardware runs and cross-backend comparison. | ~86% | ~90% |
+| Evidence insufficiency detection | Some cases cannot be resolved with the available signals. | Ambiguity audit now includes low-margin, decoder-disagreement, evidence-insufficient flags and IBM syndrome-count dispersion. | Add policy flags for risk/exactness tradeoffs. | ~65% | ~72% |
 | Real-time latency | Decoding must eventually run under strict timing constraints. | Offline timing instrumentation now reports decode, candidate generation, QDSV scoring and total policy time. | Compare local timing against Colab/IBM-derived workflow timings and identify real-time-compatible substeps. | ~25% | ~35% |
 | Full logical-operator preservation | A real qLDPC system requires formal logical operator analysis, not proxies. | Uses logical-risk/failure proxies only. | Introduce explicit logical-observable checks for small CSS/stabilizer examples before scaling. | ~25% | ~45% |
-| Hardware noise and measurement faults | Real devices include correlated noise, readout errors and time dynamics. | IBM hardware-oriented notebook is prepared but not yet executed. | Run the IBM hardware syndrome notebook and archive counts/evidence. | ~20% | ~40% |
+| Hardware noise and measurement faults | Real devices include correlated noise, readout errors and time dynamics. | Preliminary IBM `ibm_fez` syndrome-count evidence is archived for four small syndrome scenarios. | Repeat on additional backends and add noisy repeated runs. | ~40% | ~55% |
 | Production qLDPC code families | Results should be tested on known production-relevant qLDPC constructions. | Current matrices are sparse synthetic LDPC/qLDPC-style structures plus external `ldpc` decoder ensemble tests. | Add one named small code/stabilizer benchmark and document its parity-check/logical structure. | ~30% | ~50% |
 
-Overall estimated coverage of the current work: approximately 52-62% of the broader qLDPC decoding workflow gap after the external `ldpc` ensemble benchmark, uncertainty instrumentation, timing instrumentation and IBM hardware-oriented preparation.
+Overall estimated coverage of the current work: approximately 57-67% of the broader qLDPC decoding workflow gap after the external `ldpc` ensemble benchmark, uncertainty instrumentation, timing instrumentation and preliminary IBM hardware-oriented syndrome validation.
 
 Coverage of the post-decoding decision subproblem: approximately 70-78%.
 
@@ -95,7 +95,7 @@ The internal QDSV decision formula is not exposed. The public QIntent layer expo
 
 ## 4. Methodology
 
-Four experiments were conducted.
+Five experiments were conducted.
 
 ### Experiment 1: Controlled Ambiguity Benchmark
 
@@ -144,6 +144,32 @@ low_weight_alt candidates
 ```
 
 This experiment focuses on BP-failure scenarios. BP is the baseline. QDSV/QIntent selects across the decoder ensemble.
+
+### Experiment 5: IBM Hardware-Oriented Syndrome Validation
+
+Purpose: validate the handoff from real IBM hardware syndrome-count evidence into the same QDSV/QIntent post-decoding ranking layer.
+
+Backend:
+
+```text
+ibm_fez
+```
+
+Job:
+
+```text
+d977en52su3c739horng
+```
+
+The experiment uses a small two-check syndrome extraction circuit. The goal is not production qLDPC decoding, but hardware-derived evidence integration:
+
+```text
+IBM counts
+-> observed syndrome
+-> candidate correction evidence
+-> QDSV/QIntent ranking
+-> auditable JSON/CSV artifacts
+```
 
 ## 5. Experimental Results
 
@@ -222,6 +248,38 @@ Interpretation: when BP fails, QDSV/QIntent can recover exact corrections in a s
 
 This experiment also provides the strongest latency-oriented evidence so far. The local QDSV decision step is sub-millisecond on average in this configuration, while the total local policy path remains around 10.89 ms per accepted BP-failure scenario. This is not a real-time hardware decoder claim, but it narrows the latency gap from "untested" to "instrumented offline baseline".
 
+### 5.5 IBM Hardware-Oriented Syndrome Validation
+
+Configuration:
+
+```text
+Backend: ibm_fez
+Job ID: d977en52su3c739horng
+Shots: 1024
+Scenarios: no_error, x0, x1, x2
+```
+
+| Metric | Value |
+|---|---:|
+| Observed syndrome match rate | 1.0000 |
+| Average expected-syndrome probability | 0.9573 |
+| Average off-expected probability | 0.0427 |
+| Baseline exact rate | 1.0000 |
+| QDSV exact rate | 0.7500 |
+| Baseline failure-proxy rate | 0.0000 |
+| QDSV failure-proxy rate | 0.0000 |
+| Baseline average logical risk | 123.75 |
+| QDSV average logical risk | 70.00 |
+| Average risk delta | 53.75 |
+| Improved-risk scenarios | 1/4 |
+| Worse-risk scenarios | 0/4 |
+
+The hardware run produced the expected dominant syndrome in all four scenarios. The average expected-syndrome probability was 95.73%, with an average off-expected probability of 4.27%, reflecting real hardware noise/readout dispersion in the measured syndrome counts.
+
+The QDSV/QIntent layer reduced average logical-risk proxy from 123.75 to 70.00. However, in the `x1` scenario, QDSV selected the lower-risk candidate `0 2` instead of the exact singleton `1`. This is an important result rather than a failure to hide: it shows the central risk/exactness tradeoff in risk-aware post-decoding policy. For simple hardware-derived syndrome cases, a guarded policy should avoid overriding a high-confidence exact singleton unless the risk reduction and uncertainty evidence are strong enough.
+
+Interpretation: the IBM run validates the hardware-evidence handoff and improves the hardware/readout gap. It does not yet validate production qLDPC decoding or full logical-operator preservation.
+
 ## 6. Discussion
 
 The strongest contribution of QDSV/QIntent in these experiments is not replacing a decoder. The contribution is structured decision-making over decoder outputs.
@@ -252,7 +310,7 @@ Limitations:
 - The experiments are offline and do not evaluate real-time latency.
 - The external `ldpc` experiment focuses on BP-failure recovery and does not claim superiority over BP+OSD itself.
 - The QDSV policy still produces worse-risk selections in some ensemble cases.
-- No real hardware syndrome stream is used.
+- The IBM hardware-oriented run is intentionally small and validates handoff from hardware syndrome counts, not production qLDPC decoding.
 
 ## 8. Future Work
 
@@ -318,6 +376,10 @@ docs/research/evidence/qdsv_qldpc_bp_soft_multiseed_metrics.csv
 docs/research/evidence/qdsv_qldpc_real_ldpc_ensemble_recovery_evidence.json
 docs/research/evidence/qdsv_qldpc_real_ldpc_ensemble_recovery_summary.csv
 docs/research/evidence/qdsv_qldpc_real_ldpc_ensemble_recovery_metrics.csv
+docs/research/evidence/qdsv_qldpc_ibm_hardware_syndrome_evidence.json
+docs/research/evidence/qdsv_qldpc_ibm_hardware_syndrome_summary.csv
+docs/research/evidence/qdsv_qldpc_ibm_hardware_syndrome_counts.csv
+docs/research/evidence/qdsv_qldpc_ibm_hardware_syndrome_metrics.json
 ```
 
 ## 10. Conclusion

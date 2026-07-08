@@ -1,0 +1,5 @@
+scenario_id,label,source,expected_syndrome,observed_syndrome,baseline_qubits,baseline_confidence,baseline_logical_risk,baseline_exact,baseline_failure_proxy,qdsv_qubits,qdsv_confidence,qdsv_logical_risk,qdsv_exact,qdsv_failure_proxy,risk_delta
+0,no_error,ibm,00,00,none,960,45,True,False,none,960,45,True,False,0
+1,x0,ibm,01,01,0,820,70,True,False,0,820,70,True,False,0
+2,x1,ibm,11,11,1,821,310,True,False,0 2,687,95,False,False,215
+3,x2,ibm,10,10,2,824,70,True,False,2,824,70,True,False,0
