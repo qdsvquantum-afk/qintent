@@ -8,9 +8,9 @@ Quantum LDPC and qLDPC codes are promising candidates for scalable quantum error
 
 This paper evaluates QDSV/QIntent as a guarded semantic decision layer for post-decoding correction-hypothesis governance. QDSV/QIntent does not replace existing decoders. Instead, it receives decoder-generated candidates and prepared evidence signals, including syndrome consistency, decoder confidence, decoder agreement, logical-safety indicators, propagation safety and logical-risk proxies. It then performs structured candidate evaluation and returns an auditable decision trace without exposing the private QDSV scoring formula.
 
-We report six experimental stages. A controlled ambiguity benchmark demonstrates that QDSV/QIntent can select lower-risk correlated corrections when a minimum-weight baseline selects a risky singleton. A random sparse benchmark exposes cases where available evidence is insufficient and motivates richer decoder outputs. A BP-soft multi-seed benchmark over 480 scenarios shows that raw QDSV improves exact rate from 0.7708 to 0.7896 and reduces average logical risk from 141.12 to 110.80, while guarded QDSV reduces bad overrides from 5.83% to 1.46%. An external `ldpc` decoder-ensemble recovery benchmark uses real BP, BP+OSD and BP+LSD outputs. In 168 BP-failure scenarios, raw QDSV recovered exact corrections in 53.1% of cases, reduced the logical-failure proxy from 48.7% to 24.2%, and reduced average logical risk from 165.02 to 129.14. The guarded policy accepted fewer overrides but reduced bad overrides from 16.18% to 0.69% and eliminated worse-risk selections. A preliminary IBM Quantum hardware-oriented syndrome validation on `ibm_fez` shows that syndrome-count evidence from real hardware can be handed into the same QDSV/QIntent decision workflow; guarded QDSV rejected the raw override that sacrificed exactness in the `x1` scenario. Finally, a known 5-qubit stabilizer-code validation computes the formal residual `R = C E`. In 320 correctable single-error scenarios, the confidence baseline produced an 8.125% mean formal logical-failure rate, while raw and guarded QDSV matched the oracle-best candidate set with 0% formal logical-failure rate.
+We report seven experimental stages. A controlled ambiguity benchmark demonstrates that QDSV/QIntent can select lower-risk correlated corrections when a minimum-weight baseline selects a risky singleton. A random sparse benchmark exposes cases where available evidence is insufficient and motivates richer decoder outputs. A BP-soft multi-seed benchmark over 480 scenarios shows that raw QDSV improves exact rate from 0.7708 to 0.7896 and reduces average logical risk from 141.12 to 110.80, while guarded QDSV reduces bad overrides from 5.83% to 1.46%. An external `ldpc` decoder-ensemble recovery benchmark uses real BP, BP+OSD and BP+LSD outputs. In 168 BP-failure scenarios, raw QDSV recovered exact corrections in 53.1% of cases, reduced the logical-failure proxy from 48.7% to 24.2%, and reduced average logical risk from 165.02 to 129.14. The guarded policy accepted fewer overrides but reduced bad overrides from 16.18% to 0.69% and eliminated worse-risk selections. A preliminary IBM Quantum hardware-oriented syndrome validation on `ibm_fez` shows that syndrome-count evidence from real hardware can be handed into the same QDSV/QIntent decision workflow; guarded QDSV rejected the raw override that sacrificed exactness in the `x1` scenario. Finally, two known stabilizer-code validations compute the formal residual `R = C E`. In 320 correctable single-error scenarios, the 5-qubit code baseline produced an 8.125% mean formal logical-failure rate while raw and guarded QDSV achieved 0%; in the Steane [[7,1,3]] CSS code, the baseline produced a 12.1875% mean formal logical-failure rate while raw and guarded QDSV again achieved 0%.
 
-These results support the hypothesis that QDSV/QIntent can serve as a decoder-agnostic, guarded, auditable post-decoding decision layer for LDPC/qLDPC-style workflows. The results do not establish production decoder superiority, real-time suitability or quantum advantage. They identify a complementary role for semantic decision governance in decoder pipelines and motivate further evaluation with production qLDPC codes, larger stabilizer benchmarks and latency-aware implementations.
+These results support the hypothesis that QDSV/QIntent can serve as a decoder-agnostic, guarded, auditable post-decoding decision layer validated across small stabilizer-code families. The results do not establish production decoder superiority, real-time suitability or quantum advantage. They identify a complementary role for semantic decision governance in decoder pipelines and motivate further evaluation with production qLDPC codes, larger stabilizer benchmarks and latency-aware implementations.
 
 ## 1. Introduction
 
@@ -41,11 +41,11 @@ This paper focuses on practical gaps in the decoding workflow rather than propos
 | Auditability and reproducibility | Decoder decisions often lack a structured, human-readable decision trace. | Produces public block-level evidence, reproducible JSON/CSV traces and IBM job/backend metadata. | Add repeated hardware runs and cross-backend comparison. | ~86% | ~90% |
 | Evidence insufficiency detection | Some cases cannot be resolved with the available signals. | Ambiguity audit now includes low-margin, decoder-disagreement, evidence-insufficient flags, IBM syndrome-count dispersion and guarded rejection reasons. | Add repeated hardware runs and uncertainty calibration. | ~70% | ~78% |
 | Real-time latency | Decoding must eventually run under strict timing constraints. | Offline timing instrumentation now reports decode, candidate generation, QDSV scoring and total policy time. | Compare local timing against Colab/IBM-derived workflow timings and identify real-time-compatible substeps. | ~25% | ~35% |
-| Full logical-operator preservation | A real qLDPC system requires formal logical operator analysis, not proxies. | Adds a known 5-qubit stabilizer-code validation using residual classification `R = C E`, with `R in S` as logical success and `R in N(S) \ S` as logical failure. | Extend from correctable single-error cases to larger stabilizer/CSS examples and production qLDPC-style codes. | ~55% | ~70% |
+| Full logical-operator preservation | A real qLDPC system requires formal logical operator analysis, not proxies. | Adds two known stabilizer-code validations, 5-qubit and Steane CSS, using residual classification `R = C E`, with `R in S` as logical success and `R in N(S) \ S` as logical failure. | Extend from correctable single-error cases to larger stabilizer/CSS examples and production qLDPC-style codes. | ~65% | ~78% |
 | Hardware noise and measurement faults | Real devices include correlated noise, readout errors and time dynamics. | Preliminary IBM `ibm_fez` syndrome-count evidence is archived for four small syndrome scenarios. | Repeat on additional backends and add noisy repeated runs. | ~40% | ~55% |
-| Production qLDPC code families | Results should be tested on known production-relevant qLDPC constructions. | Adds a named 5-qubit perfect stabilizer-code benchmark with explicit stabilizer generators, normalizer and residual classification; qLDPC-scale families remain future work. | Add CSS/surface-code and production qLDPC-style benchmarks. | ~50% | ~65% |
+| Production qLDPC code families | Results should be tested on known production-relevant qLDPC constructions. | Adds named 5-qubit and Steane CSS stabilizer-code benchmarks with explicit stabilizer generators, normalizer and residual classification; qLDPC-scale families remain future work. | Add surface-code and production qLDPC-style benchmarks. | ~58% | ~70% |
 
-Overall estimated coverage of the current work: approximately 68-77% of the broader qLDPC decoding workflow gap after the external `ldpc` ensemble benchmark, uncertainty instrumentation, timing instrumentation, guarded policy evaluation, preliminary IBM hardware-oriented syndrome validation and known stabilizer-code logical validation.
+Overall estimated coverage of the current work: approximately 72-80% of the broader qLDPC decoding workflow gap after the external `ldpc` ensemble benchmark, uncertainty instrumentation, timing instrumentation, guarded policy evaluation, preliminary IBM hardware-oriented syndrome validation and two known stabilizer-code logical validations.
 
 Coverage of the post-decoding decision subproblem: approximately 78-85%.
 
@@ -106,7 +106,7 @@ The POST contribution is not limited to candidate re-ranking. It provides a stru
 
 ## 4. Methodology
 
-Six experiments were conducted.
+Seven experiments were conducted.
 
 ### Experiment 1: Controlled Ambiguity Benchmark
 
@@ -208,6 +208,27 @@ R in N(S)\S   -> formal logical failure
 ```
 
 The benchmark evaluates a confidence-only baseline, raw QDSV/QIntent, guarded QDSV/QIntent and an `oracle_best` reference over the same candidate set. The oracle is used only as an experimental upper-bound reference; it is not part of the proposed method.
+
+### Experiment 7: Steane CSS Logical Validation
+
+Purpose: test whether the formal logical-preservation behavior observed in the 5-qubit code generalizes to a second known stabilizer-code family with CSS structure.
+
+Code:
+
+```text
+Steane [[7,1,3]] CSS stabilizer code
+generators: IIIXXXX, IXXIIXX, XIXIXIX, IIIZZZZ, IZZIIZZ, ZIZIZIZ
+```
+
+The same residual test is used:
+
+```text
+R = C E
+R in S        -> formal logical success
+R in N(S)\S   -> formal logical failure
+```
+
+This experiment adds CSS-sector evidence but keeps the same public QIntent pattern: syndrome evidence, logical-safety evidence, decoder evidence and guarded override policy.
 
 ## 5. Experimental Results
 
@@ -353,17 +374,50 @@ Interpretation: this experiment closes the main causal gap left by proxy-only lo
 
 This result should be interpreted narrowly. It does not prove production qLDPC decoder superiority, and it uses a small correctable-code setting. Its contribution is to demonstrate that QDSV/QIntent decision governance can be evaluated against formal logical-success and logical-failure conditions, not only heuristic risk proxies.
 
+### 5.7 Steane [[7,1,3]] CSS Logical Validation
+
+Configuration:
+
+```text
+Code: Steane [[7,1,3]] CSS stabilizer code
+Stabilizer generators: IIIXXXX, IXXIIXX, XIXIXIX, IIIZZZZ, IZZIIZZ, ZIZIZIZ
+Seeds: 8
+Samples per seed: 40
+Total scenarios: 320
+Error model: correctable single-qubit Pauli errors
+Formal residual: R = C E
+```
+
+| Metric | Confidence baseline | Oracle best | QDSV raw | QDSV guarded |
+|---|---:|---:|---:|---:|
+| Formal logical-failure rate, mean | 0.121875 | 0.00000 | 0.00000 | 0.00000 |
+| Formal logical-failure rate, std | 0.04750 | 0.00000 | 0.00000 | 0.00000 |
+| Formal logical-success rate, mean | 0.878125 | 1.00000 | 1.00000 | 1.00000 |
+| Average logical risk, mean | 99.71 | 70.91 | 70.91 | 70.91 |
+| Average risk delta vs baseline | - | 28.81 | 28.81 | 28.81 |
+| Override rate, mean | - | - | 0.121875 | 0.121875 accepted |
+| Bad override rate, mean | - | - | 0.00000 | 0.00000 |
+| Successful override rate, mean | - | - | 0.121875 | 0.121875 |
+| Recovery over baseline logical failures | - | 1.00000 | 1.00000 | 1.00000 |
+| QDSV decision time, mean | - | - | 2.79 ms | 2.79 ms |
+| Total local policy time, mean | - | - | 12.28 ms | 12.28 ms |
+
+Interpretation: the Steane experiment reproduces the formal logical-preservation pattern in a CSS stabilizer code. The confidence baseline occasionally selected high-confidence multi-Pauli candidates whose residual was a non-trivial logical operator. Raw and guarded QDSV/QIntent selected candidates whose residual belonged to the stabilizer group and matched the oracle-best candidate set over the available hypotheses.
+
+The scientific value is not that QDSV is perfect in this small setting. The value is cross-code consistency: the same decision-governance pattern that worked in the 5-qubit stabilizer code also worked in a CSS code with explicit X/Z stabilizer structure. This reduces the risk that the formal logical-preservation result is an artifact of a single code.
+
 ## 6. Discussion
 
 The strongest contribution of QDSV/QIntent in these experiments is not replacing a decoder. The contribution is guarded semantic governance over decoder outputs.
 
-The experiments show five important behaviors:
+The experiments show six important behaviors:
 
 1. Raw QDSV/QIntent can use logical-risk and safety signals to override unsafe confidence-only selections.
 2. Guarded QDSV/QIntent can reduce bad overrides and preserve reliable baseline decisions.
 3. When evidence is insufficient, ambiguity audits reveal where more decoder information is required.
 4. With real external LDPC decoder outputs, QDSV/QIntent can recover from BP failures by selecting across BP, BP+OSD, BP+LSD and compatible alternatives.
-5. In a known stabilizer-code setting, QDSV/QIntent decisions can be evaluated against formal residual membership conditions rather than only proxy risk metrics.
+5. In known stabilizer-code settings, QDSV/QIntent decisions can be evaluated against formal residual membership conditions rather than only proxy risk metrics.
+6. The formal logical-preservation behavior was reproduced across two small code families: a 5-qubit perfect stabilizer code and the Steane CSS code.
 
 The results suggest that QDSV/QIntent is most useful as a policy and audit layer in the post-decoding workflow:
 
@@ -382,7 +436,7 @@ This work remains preliminary.
 Limitations:
 
 - The check matrices are sparse synthetic LDPC/qLDPC-style structures.
-- Most LDPC/qLDPC-style benchmarks still use logical-risk proxies; formal residual classification has so far been demonstrated only on a small 5-qubit stabilizer-code benchmark.
+- Most LDPC/qLDPC-style benchmarks still use logical-risk proxies; formal residual classification has so far been demonstrated only on small 5-qubit and Steane CSS stabilizer-code benchmarks.
 - The experiments are offline and do not evaluate real-time latency.
 - The external `ldpc` experiment focuses on BP-failure recovery and does not claim superiority over BP+OSD itself.
 - Raw QDSV can still produce bad overrides; guarded QDSV reduces but does not mathematically eliminate all bad override risk.
@@ -392,7 +446,7 @@ Limitations:
 
 Before submission to a stronger venue, the most important next steps are:
 
-1. Extend formal logical analysis from the 5-qubit stabilizer benchmark to CSS, surface-code and qLDPC-style code families.
+1. Extend formal logical analysis from the 5-qubit and Steane stabilizer benchmarks to surface-code and qLDPC-style code families.
 2. Test known LDPC/qLDPC code constructions rather than only synthetic sparse matrices.
 3. Tune guarded decision policies against larger decoder ensembles and policy-ablation baselines.
 4. Measure latency and identify which parts could run in real-time versus offline audit.
@@ -432,6 +486,7 @@ docs/research/scripts/qldpc_bp_soft_multiseed.py
 docs/research/scripts/qldpc_ldpc_ensemble_recovery.py
 docs/research/scripts/qldpc_ibm_guarded_reprocess.py
 docs/research/scripts/qldpc_stabilizer_logical_validation.py
+docs/research/scripts/qldpc_steane_css_logical_validation.py
 ```
 
 Hardware-oriented validation plan:
@@ -461,6 +516,9 @@ docs/research/evidence/qdsv_qldpc_ibm_hardware_syndrome_metrics.json
 docs/research/evidence/qdsv_qldpc_five_qubit_stabilizer_logical_evidence.json
 docs/research/evidence/qdsv_qldpc_five_qubit_stabilizer_logical_summary.csv
 docs/research/evidence/qdsv_qldpc_five_qubit_stabilizer_logical_metrics.csv
+docs/research/evidence/qdsv_qldpc_steane_css_logical_evidence.json
+docs/research/evidence/qdsv_qldpc_steane_css_logical_summary.csv
+docs/research/evidence/qdsv_qldpc_steane_css_logical_metrics.csv
 ```
 
 ## 10. Conclusion
@@ -471,6 +529,6 @@ The results support a focused conclusion: QDSV/QIntent can organize decoder-gene
 
 The strongest decoder-ensemble result is the external `ldpc` recovery benchmark: in 168 BP-failure scenarios, raw QDSV/QIntent recovered exact corrections in 53.1% of cases and reduced the logical-failure proxy from 48.7% to 24.2%. Guarded QDSV/QIntent accepted fewer overrides, but reduced bad overrides from 16.18% to 0.69% and eliminated worse-risk selections in this benchmark.
 
-The strongest logical-preservation result is the 5-qubit stabilizer-code benchmark: over 320 correctable single-error scenarios, the confidence baseline produced an 8.125% mean formal logical-failure rate, while raw and guarded QDSV/QIntent selected corrections with 0% formal logical-failure rate and matched the oracle-best candidate set under residual classification `R = C E`.
+The strongest logical-preservation result is now cross-code consistency across two stabilizer families. In the 5-qubit stabilizer-code benchmark, over 320 correctable single-error scenarios, the confidence baseline produced an 8.125% mean formal logical-failure rate, while raw and guarded QDSV/QIntent selected corrections with 0% formal logical-failure rate. In the Steane [[7,1,3]] CSS benchmark, the confidence baseline produced a 12.1875% mean formal logical-failure rate, while raw and guarded QDSV/QIntent again selected corrections with 0% formal logical-failure rate. In both cases, QDSV matched the oracle-best candidate set under residual classification `R = C E`.
 
 The work does not claim a new qLDPC decoder, production readiness or quantum advantage. It contributes evidence for a complementary semantic decision-governance layer that can sit after existing decoders and support risk-aware, auditable and conservative correction-hypothesis selection.
