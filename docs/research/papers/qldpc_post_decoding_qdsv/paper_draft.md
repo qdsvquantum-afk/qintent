@@ -32,22 +32,24 @@ This work explores QDSV/QIntent in that decision gap. QDSV provides a semantic r
 
 This paper focuses on practical gaps in the decoding workflow rather than proposing a new code family.
 
-| Gap | Meaning in decoding workflow | QDSV/QIntent contribution in this work | Coverage estimate |
-|---|---|---:|---:|
-| Syndrome ambiguity | Multiple correction hypotheses can satisfy the same syndrome. | Represents candidates as decision states and evaluates syndrome, decoder and logical-safety evidence together. | ~60% |
-| Candidate selection under competing criteria | The highest-confidence or minimum-weight correction may not be the safest correction. | Re-ranks candidates using structured evidence, confidence, agreement, risk and safety signals. | ~70% |
-| Risk-aware correction choice | A locally plausible correction can be structurally risky or logical-sensitive. | Adds logical-risk, propagation-safety, distance-safety and logical-preservation proxies. | ~65% |
-| Decoder disagreement | BP, BP+OSD, BP+LSD or alternative methods may produce different corrections. | Treats decoder outputs as an ensemble and selects across them using method reliability and evidence. | ~55% |
-| Auditability and reproducibility | Decoder decisions often lack a structured, human-readable decision trace. | Produces public block-level evidence and reproducible JSON/CSV traces. | ~80% |
-| Evidence insufficiency detection | Some cases cannot be resolved with the available signals. | Ambiguity audit detects observationally indistinguishable scenarios. | ~50% |
-| Real-time latency | Decoding must eventually run under strict timing constraints. | Not solved. Current experiments are offline/local scripts. | ~10% |
-| Full logical-operator preservation | A real qLDPC system requires formal logical operator analysis, not proxies. | Uses logical-risk/failure proxies only. | ~25% |
-| Hardware noise and measurement faults | Real devices include correlated noise, readout errors and time dynamics. | Not yet evaluated with real hardware syndromes. | ~15% |
-| Production qLDPC code families | Results should be tested on known production-relevant qLDPC constructions. | Current matrices are sparse synthetic LDPC/qLDPC-style structures. | ~25% |
+| Gap | Meaning in decoding workflow | Current QDSV/QIntent contribution | Next validation step | Current coverage | Target after next step |
+|---|---|---|---|---:|---:|
+| Syndrome ambiguity | Multiple correction hypotheses can satisfy the same syndrome. | Represents candidates as decision states and evaluates syndrome, decoder and logical-safety evidence together. | Add hardware-derived syndrome-count evidence and compare Aer vs IBM observed syndromes. | ~60% | ~70% |
+| Candidate selection under competing criteria | The highest-confidence or minimum-weight correction may not be the safest correction. | Re-ranks candidates using structured evidence, confidence, agreement, risk and safety signals. | Add guarded policy tests over larger multi-seed decoder-ensemble outputs. | ~70% | ~78% |
+| Risk-aware correction choice | A locally plausible correction can be structurally risky or logical-sensitive. | Adds logical-risk, propagation-safety, distance-safety and logical-preservation proxies. | Replace part of the proxy logic with explicit logical-observable or stabilizer-derived sensitivity features. | ~65% | ~75% |
+| Decoder disagreement | BP, BP+OSD, BP+LSD or alternative methods may produce different corrections. | Treats decoder outputs as an ensemble and selects across them using method reliability and evidence. | Compare QDSV policy against BP-only, BP+OSD-preferred, BP+LSD-preferred and oracle-best ensemble baselines. | ~55% | ~70% |
+| Auditability and reproducibility | Decoder decisions often lack a structured, human-readable decision trace. | Produces public block-level evidence and reproducible JSON/CSV traces. | Add hardware job metadata, backend name, counts and selected policy trace to evidence artifacts. | ~80% | ~88% |
+| Evidence insufficiency detection | Some cases cannot be resolved with the available signals. | Ambiguity audit detects observationally indistinguishable scenarios. | Add uncertainty flags for low margin, decoder disagreement and syndrome-count dispersion. | ~50% | ~65% |
+| Real-time latency | Decoding must eventually run under strict timing constraints. | Not solved. Current experiments are offline/local scripts. | Add timing instrumentation for candidate generation, QIntent scoring and total policy decision time. | ~10% | ~30% |
+| Full logical-operator preservation | A real qLDPC system requires formal logical operator analysis, not proxies. | Uses logical-risk/failure proxies only. | Introduce explicit logical-observable checks for small CSS/stabilizer examples before scaling. | ~25% | ~45% |
+| Hardware noise and measurement faults | Real devices include correlated noise, readout errors and time dynamics. | IBM hardware-oriented notebook is prepared but not yet executed. | Run the IBM hardware syndrome notebook and archive counts/evidence. | ~20% | ~40% |
+| Production qLDPC code families | Results should be tested on known production-relevant qLDPC constructions. | Current matrices are sparse synthetic LDPC/qLDPC-style structures plus external `ldpc` decoder ensemble tests. | Add one named small code/stabilizer benchmark and document its parity-check/logical structure. | ~30% | ~50% |
 
-Overall estimated coverage of the current work: approximately 45-55% of the broader qLDPC decoding workflow gap.
+Overall estimated coverage of the current work: approximately 50-60% of the broader qLDPC decoding workflow gap after the external `ldpc` ensemble benchmark and IBM hardware-oriented preparation.
 
-Coverage of the post-decoding decision subproblem: approximately 65-75%.
+Coverage of the post-decoding decision subproblem: approximately 70-78%.
+
+The next execution target is not only to improve one row. The target is to raise every weak row at least one level: hardware evidence, latency instrumentation, explicit logical checks, richer uncertainty flags and one better-defined code structure.
 
 ## 3. QDSV/QIntent Post-Decoding Model
 
