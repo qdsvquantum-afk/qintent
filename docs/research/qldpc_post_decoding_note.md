@@ -154,6 +154,51 @@ Interpretation:
 
 The baseline selects the high-confidence singleton because it is the minimum-weight hypothesis. QDSV/QIntent selects the lower-confidence correlated correction because it has stronger logical safety and lower risk. This is the intended behavior of a post-decoding decision layer: it does not replace the decoder, but it can re-rank decoder-generated candidates when confidence alone is structurally unsafe.
 
+## Random Sparse and BP-Soft Follow-Up
+
+After the controlled benchmark, two follow-up notebooks were added to test less constructed settings.
+
+The random sparse benchmark generates a sparse check matrix, random error samples, low-weight syndrome-compatible candidates, and compares three public policies:
+
+```text
+baseline
+risk_first
+balanced
+guarded_balanced
+```
+
+This benchmark showed an important limitation: some scenarios are observationally ambiguous under the available candidate evidence. In particular, two scenarios can have the same observable candidate structure while the correct decision differs. This is not a failure of QDSV/QIntent; it indicates that a post-decoding policy needs richer decoder evidence than synthetic confidence and risk fields alone.
+
+The next notebook therefore adds a lightweight BP-style soft decoder. BP produces posterior error probabilities and a decoder margin, which are used as additional prepared evidence. QDSV/QIntent then re-ranks the BP-generated candidate set.
+
+### BP-Soft Benchmark Results
+
+The BP-soft benchmark used:
+
+```text
+N_QUBITS = 24
+M_CHECKS = 8
+N_SAMPLES = 40
+MAX_CANDIDATE_WEIGHT = 3
+PHYSICAL_ERROR_RATE = 0.14
+```
+
+Summary:
+
+| Metric | BP-confidence baseline | BP + QDSV/QIntent |
+|---|---:|---:|
+| Exact correction rate | 0.725 | 0.875 |
+| Logical-failure proxy rate | 0.000 | 0.000 |
+| Average logical risk | 153.05 | 109.80 |
+| Average risk delta | - | 43.25 |
+| Improved-risk scenarios | - | 10/40 |
+| Worse-risk scenarios | - | 0/40 |
+| Average exact-delta | - | +0.15 |
+
+Representative changed scenarios include cases where the BP-confidence baseline selected a high-confidence but non-exact correction, while QDSV/QIntent selected the exact lower-risk correction using structured evidence from decoder confidence, decoder margin, logical preservation, distance safety and propagation safety.
+
+This result is stronger than the controlled benchmark because QDSV/QIntent is no longer operating only over a hand-shaped ambiguity. It is receiving soft evidence from a decoder-style message-passing process. The result still remains a toy sparse-check benchmark, but it supports the narrower claim that QDSV/QIntent can act as a structured decision layer over decoder outputs.
+
 ## Audit Trace
 
 For the selected QDSV correction, the public audit trace includes block-level evidence:
@@ -180,12 +225,13 @@ This gives reviewers a reproducible decision trace without exposing the private 
 
 ## Limitations
 
-This benchmark is controlled and intentionally constructed. It should not be interpreted as a full qLDPC decoding benchmark.
+These benchmarks should not be interpreted as full production qLDPC decoding benchmarks.
 
 Important limitations:
 
-- The sparse check structure is synthetic.
-- The candidate generator is exhaustive over low-weight hypotheses, not a production qLDPC decoder.
+- The sparse check structures are synthetic.
+- The candidate generator is exhaustive over low-weight hypotheses.
+- The BP-soft decoder is a lightweight notebook implementation, not an optimized production decoder.
 - The logical-failure proxy is a controlled structural proxy, not a full logical operator analysis over a production code.
 - The benchmark tests a post-decoding decision layer, not a real-time hardware decoder.
 - The public API executes the structured decision workflow over prepared evidence; it does not execute a quantum circuit for this benchmark.
@@ -228,17 +274,25 @@ The controlled benchmark is available as a Colab notebook:
 
 [qLDPC controlled formal benchmark Colab](https://colab.research.google.com/github/qdsvquantum-afk/qintent/blob/main/notebooks/qldpc_formal_benchmark_colab.ipynb)
 
-The notebook generates:
+The BP-soft follow-up benchmark is available here:
+
+[qLDPC BP-soft decoder reranking Colab](https://colab.research.google.com/github/qdsvquantum-afk/qintent/blob/main/notebooks/qldpc_bp_soft_decoder_reranking_colab.ipynb)
+
+The notebooks generate:
 
 ```text
 qdsv_qldpc_formal_benchmark_evidence.json
 qdsv_qldpc_formal_benchmark_summary.csv
+qdsv_qldpc_bp_soft_decoder_evidence.json
+qdsv_qldpc_bp_soft_decoder_summary.csv
 ```
 
 The generated evidence used for this note is archived in this repository:
 
 - [evidence/qdsv_qldpc_formal_benchmark_evidence.json](evidence/qdsv_qldpc_formal_benchmark_evidence.json)
 - [evidence/qdsv_qldpc_formal_benchmark_summary.csv](evidence/qdsv_qldpc_formal_benchmark_summary.csv)
+- [evidence/qdsv_qldpc_bp_soft_decoder_evidence.json](evidence/qdsv_qldpc_bp_soft_decoder_evidence.json)
+- [evidence/qdsv_qldpc_bp_soft_decoder_summary.csv](evidence/qdsv_qldpc_bp_soft_decoder_summary.csv)
 
 The QIntent public preview endpoint used in the notebook exposes:
 
@@ -251,4 +305,6 @@ monthly_request_quota_scope: ip_or_optional_api_key
 
 The controlled benchmark supports the hypothesis that QDSV/QIntent can act as a risk-aware post-decoding decision layer for qLDPC-style correction candidates. In a constructed ambiguity where a high-confidence singleton competes against a lower-confidence correlated correction with the same syndrome, QDSV consistently selected the exact lower-risk correction and avoided the logical-failure proxy.
 
-The result is not yet evidence of production qLDPC decoder superiority. It is evidence that the QDSV structured semantic decision layer is capable of using logical-risk and safety evidence to re-rank decoder-generated candidates in a reproducible and auditable way.
+The BP-soft follow-up adds a more realistic signal source: posterior evidence from a message-passing decoder. In that toy benchmark, QDSV/QIntent improved exact correction rate from 0.725 to 0.875, reduced average logical risk from 153.05 to 109.80, and did not increase the logical-failure proxy.
+
+The result is not yet evidence of production qLDPC decoder superiority. It is evidence that the QDSV structured semantic decision layer is capable of using decoder confidence, decoder margin, logical-risk and safety evidence to re-rank decoder-generated candidates in a reproducible and auditable way.
