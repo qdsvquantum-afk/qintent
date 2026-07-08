@@ -69,6 +69,14 @@ Default narrative:
 QIntent -> QDSV -> QuEST/statevector -> no user-written circuits
 ```
 
+## QIntent -> Bridge -> Qiskit
+
+QIntent can also act as an upstream intent layer for QDSV Bridge when a workflow needs to end in a Qiskit-oriented artifact:
+
+- [QIntent to QDSV Bridge to Qiskit](docs/integrations/qintent_bridge_qiskit.md)
+
+This route keeps QIntent positioned as the problem-intent language and uses QDSV Bridge, a Qiskit Ecosystem project, for the OpenQASM/Qiskit artifact handoff.
+
 ## What This Is
 
 - A lightweight Python client SDK for QIntent.
