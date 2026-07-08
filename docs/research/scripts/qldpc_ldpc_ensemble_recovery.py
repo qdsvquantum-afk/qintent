@@ -17,6 +17,7 @@ import json
 import math
 import random
 import sys
+import time
 from dataclasses import asdict, dataclass
 from itertools import combinations
 from pathlib import Path
@@ -69,6 +70,21 @@ find_rows("candidate_index")
   .rank()
   .top_k(1)
 """
+
+
+def _score_margin(result: dict[str, Any]) -> float:
+    enriched = result.get("rows_enriched") or result.get("rows") or []
+    scores = sorted(
+        [
+            float(row["_qdsv_structured_semantic_score"])
+            for row in enriched
+            if row.get("_qdsv_structured_semantic_score") is not None
+        ],
+        reverse=True,
+    )
+    if len(scores) < 2:
+        return 1000.0
+    return scores[0] - scores[1]
 
 
 @dataclass(frozen=True)
@@ -268,13 +284,18 @@ class RealLdpcEnsembleBenchmark:
         max_attempts = self.config.samples_per_seed * self.config.max_attempts_multiplier
 
         while scenario_id < self.config.samples_per_seed and attempts < max_attempts:
+            total_start = time.perf_counter()
             attempts += 1
             true_error = self.sample_true_error()
             syndrome = self.syndrome(true_error)
             probabilities = self.sample_channel_probabilities(true_error)
+            decode_start = time.perf_counter()
             candidates = self.decoder_candidates(syndrome, probabilities)
+            decode_ms = (time.perf_counter() - decode_start) * 1000
+            candidate_start = time.perf_counter()
             candidates.extend(self.compatible_low_weight_candidates(syndrome, probabilities))
             rows = self.build_rows(candidates, syndrome, true_error)
+            candidate_ms = (time.perf_counter() - candidate_start) * 1000
             if len(rows) < 2 or not any(row["decoder_method"] == "bp" for row in rows):
                 continue
 
@@ -290,8 +311,23 @@ class RealLdpcEnsembleBenchmark:
 
             payload = dict(compiled_process_data)
             payload["rows"] = rows
+            qdsv_start = time.perf_counter()
             result = compile_process_data_spec(payload)
+            qdsv_ms = (time.perf_counter() - qdsv_start) * 1000
             selected = result["selected_rows"][0]
+            qdsv_margin = _score_margin(result)
+            method_count = int(frame["decoder_method"].nunique())
+            low_qdsv_margin = qdsv_margin < 25
+            decoder_disagreement = method_count >= 3
+            many_candidates = len(rows) >= 5
+            baseline_confidence = int(baseline["decoder_confidence"])
+            low_baseline_confidence = baseline_confidence < 750
+            uncertainty_flag_count = (
+                int(low_qdsv_margin)
+                + int(decoder_disagreement)
+                + int(many_candidates)
+                + int(low_baseline_confidence)
+            )
 
             rows_out.append(
                 {
@@ -311,6 +347,20 @@ class RealLdpcEnsembleBenchmark:
                     "risk_delta": int(baseline["logical_risk"]) - int(selected["logical_risk"]),
                     "exact_delta": int(bool(selected["exact_correction"])) - int(bool(baseline["exact_correction"])),
                     "failure_delta": int(bool(baseline["logical_failure_proxy"])) - int(bool(selected["logical_failure_proxy"])),
+                    "candidate_count": len(rows),
+                    "decoder_method_count": method_count,
+                    "baseline_confidence": baseline_confidence,
+                    "qdsv_score_margin": float(qdsv_margin),
+                    "uncertainty_low_qdsv_margin": low_qdsv_margin,
+                    "uncertainty_decoder_disagreement": decoder_disagreement,
+                    "uncertainty_many_candidates": many_candidates,
+                    "uncertainty_low_baseline_confidence": low_baseline_confidence,
+                    "uncertainty_flag_count": uncertainty_flag_count,
+                    "evidence_insufficient_flag": uncertainty_flag_count >= 2,
+                    "timing_decode_ms": float(decode_ms),
+                    "timing_candidate_ms": float(candidate_ms),
+                    "timing_qdsv_ms": float(qdsv_ms),
+                    "timing_total_ms": float((time.perf_counter() - total_start) * 1000),
                 }
             )
             scenario_id += 1
@@ -338,6 +388,12 @@ def _seed_metrics(seed: int, attempts: int, frame: pd.DataFrame) -> dict[str, An
         "worse_risk_count": int((frame["risk_delta"] < 0).sum()),
         "avg_exact_delta": float(frame["exact_delta"].mean()),
         "avg_failure_delta": float(frame["failure_delta"].mean()),
+        "evidence_insufficient_rate": _rate(frame["evidence_insufficient_flag"]),
+        "avg_qdsv_score_margin": float(frame["qdsv_score_margin"].mean()),
+        "avg_timing_decode_ms": float(frame["timing_decode_ms"].mean()),
+        "avg_timing_candidate_ms": float(frame["timing_candidate_ms"].mean()),
+        "avg_timing_qdsv_ms": float(frame["timing_qdsv_ms"].mean()),
+        "avg_timing_total_ms": float(frame["timing_total_ms"].mean()),
     }
 
 
@@ -352,6 +408,12 @@ def _aggregate(seed_metrics: list[dict[str, Any]]) -> dict[str, Any]:
         "avg_risk_delta",
         "avg_exact_delta",
         "avg_failure_delta",
+        "evidence_insufficient_rate",
+        "avg_qdsv_score_margin",
+        "avg_timing_decode_ms",
+        "avg_timing_candidate_ms",
+        "avg_timing_qdsv_ms",
+        "avg_timing_total_ms",
     ]
     out: dict[str, Any] = {
         "seed_count": len(seed_metrics),

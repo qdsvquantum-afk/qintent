@@ -39,13 +39,13 @@ This paper focuses on practical gaps in the decoding workflow rather than propos
 | Risk-aware correction choice | A locally plausible correction can be structurally risky or logical-sensitive. | Adds logical-risk, propagation-safety, distance-safety and logical-preservation proxies. | Replace part of the proxy logic with explicit logical-observable or stabilizer-derived sensitivity features. | ~65% | ~75% |
 | Decoder disagreement | BP, BP+OSD, BP+LSD or alternative methods may produce different corrections. | Treats decoder outputs as an ensemble and selects across them using method reliability and evidence. | Compare QDSV policy against BP-only, BP+OSD-preferred, BP+LSD-preferred and oracle-best ensemble baselines. | ~55% | ~70% |
 | Auditability and reproducibility | Decoder decisions often lack a structured, human-readable decision trace. | Produces public block-level evidence and reproducible JSON/CSV traces. | Add hardware job metadata, backend name, counts and selected policy trace to evidence artifacts. | ~80% | ~88% |
-| Evidence insufficiency detection | Some cases cannot be resolved with the available signals. | Ambiguity audit detects observationally indistinguishable scenarios. | Add uncertainty flags for low margin, decoder disagreement and syndrome-count dispersion. | ~50% | ~65% |
-| Real-time latency | Decoding must eventually run under strict timing constraints. | Not solved. Current experiments are offline/local scripts. | Add timing instrumentation for candidate generation, QIntent scoring and total policy decision time. | ~10% | ~30% |
+| Evidence insufficiency detection | Some cases cannot be resolved with the available signals. | Ambiguity audit now includes low-margin, decoder-disagreement and evidence-insufficient flags in benchmark outputs. | Add syndrome-count dispersion after IBM hardware execution. | ~60% | ~70% |
+| Real-time latency | Decoding must eventually run under strict timing constraints. | Offline timing instrumentation now reports decode, candidate generation, QDSV scoring and total policy time. | Compare local timing against Colab/IBM-derived workflow timings and identify real-time-compatible substeps. | ~25% | ~35% |
 | Full logical-operator preservation | A real qLDPC system requires formal logical operator analysis, not proxies. | Uses logical-risk/failure proxies only. | Introduce explicit logical-observable checks for small CSS/stabilizer examples before scaling. | ~25% | ~45% |
 | Hardware noise and measurement faults | Real devices include correlated noise, readout errors and time dynamics. | IBM hardware-oriented notebook is prepared but not yet executed. | Run the IBM hardware syndrome notebook and archive counts/evidence. | ~20% | ~40% |
 | Production qLDPC code families | Results should be tested on known production-relevant qLDPC constructions. | Current matrices are sparse synthetic LDPC/qLDPC-style structures plus external `ldpc` decoder ensemble tests. | Add one named small code/stabilizer benchmark and document its parity-check/logical structure. | ~30% | ~50% |
 
-Overall estimated coverage of the current work: approximately 50-60% of the broader qLDPC decoding workflow gap after the external `ldpc` ensemble benchmark and IBM hardware-oriented preparation.
+Overall estimated coverage of the current work: approximately 52-62% of the broader qLDPC decoding workflow gap after the external `ldpc` ensemble benchmark, uncertainty instrumentation, timing instrumentation and IBM hardware-oriented preparation.
 
 Coverage of the post-decoding decision subproblem: approximately 70-78%.
 
@@ -184,8 +184,14 @@ Configuration:
 | Average logical risk, std | 13.03 | 11.38 |
 | Improved-risk scenarios | - | 74/480 |
 | Worse-risk scenarios | - | 0/480 |
+| Evidence-insufficient flag rate, mean | - | 0.1979 |
+| QDSV score margin, mean | - | 103.32 |
+| QDSV decision time, mean | - | 2.21 ms |
+| Total local policy time, mean | - | 51.63 ms |
 
 Interpretation: QDSV/QIntent provided stable risk reduction across seeds with no worse-risk selections under this configuration. Exact correction improved modestly on average.
+
+The added timing and uncertainty instrumentation shows that this configuration is not yet a real-time decoder implementation, but the QDSV scoring step itself is small relative to candidate generation. The evidence-insufficient flag rate also provides a reproducible way to identify cases where the available signals may be too weak for a confident correction decision.
 
 ### 5.4 External `ldpc` Decoder-Ensemble Recovery
 
@@ -207,8 +213,14 @@ Total BP-failure scenarios: 168
 | Average risk delta, mean | - | 35.88 |
 | Improved-risk scenarios | - | 61/168 |
 | Worse-risk scenarios | - | 28/168 |
+| Evidence-insufficient flag rate, mean | - | 0.0551 |
+| QDSV score margin, mean | - | 216.78 |
+| QDSV decision time, mean | - | 0.80 ms |
+| Total local policy time, mean | - | 10.89 ms |
 
 Interpretation: when BP fails, QDSV/QIntent can recover exact corrections in a substantial fraction of cases by selecting over a decoder ensemble. It also reduces the logical-failure proxy and average logical risk. However, the existence of 28 worse-risk cases shows that policy calibration remains necessary.
+
+This experiment also provides the strongest latency-oriented evidence so far. The local QDSV decision step is sub-millisecond on average in this configuration, while the total local policy path remains around 10.89 ms per accepted BP-failure scenario. This is not a real-time hardware decoder claim, but it narrows the latency gap from "untested" to "instrumented offline baseline".
 
 ## 6. Discussion
 
