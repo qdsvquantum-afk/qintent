@@ -1,5 +1,5 @@
-scenario_id,label,source,expected_syndrome,observed_syndrome,baseline_qubits,baseline_confidence,baseline_logical_risk,baseline_exact,baseline_failure_proxy,qdsv_qubits,qdsv_confidence,qdsv_logical_risk,qdsv_exact,qdsv_failure_proxy,risk_delta
-0,no_error,ibm,00,00,none,960,45,True,False,none,960,45,True,False,0
-1,x0,ibm,01,01,0,820,70,True,False,0,820,70,True,False,0
-2,x1,ibm,11,11,1,821,310,True,False,0 2,687,95,False,False,215
-3,x2,ibm,10,10,2,824,70,True,False,2,824,70,True,False,0
+scenario_id,label,source,expected_syndrome,observed_syndrome,baseline_qubits,baseline_confidence,baseline_logical_risk,baseline_exact,baseline_failure_proxy,qdsv_qubits,qdsv_confidence,qdsv_logical_risk,qdsv_exact,qdsv_failure_proxy,risk_delta,qdsv_raw_qubits,qdsv_raw_confidence,qdsv_raw_logical_risk,qdsv_raw_exact,qdsv_raw_failure_proxy,qdsv_guarded_qubits,qdsv_guarded_confidence,qdsv_guarded_logical_risk,qdsv_guarded_exact,qdsv_guarded_failure_proxy,guarded_risk_delta,guarded_exact_delta,guarded_failure_delta,raw_override_attempted,guarded_override_accepted,guarded_override_rejected,guarded_reason,raw_bad_override,guarded_bad_override,off_expected_probability
+0,no_error,ibm,00,00,none,960,45,True,False,none,960,45,True,False,0,none,960,45,True,False,none,960,45,True,False,0,0,0,False,False,False,same_as_baseline,False,False,0.0390625
+1,x0,ibm,01,01,0,820,70,True,False,0,820,70,True,False,0,0,820,70,True,False,0,820,70,True,False,0,0,0,False,False,False,same_as_baseline,False,False,0.0458984375
+2,x1,ibm,11,11,1,821,310,True,False,0 2,687,95,False,False,215,0 2,687,95,False,False,1,821,310,True,False,0,0,0,True,False,True,reject_confidence_drop,True,False,0.044921875
+3,x2,ibm,10,10,2,824,70,True,False,2,824,70,True,False,0,2,824,70,True,False,2,824,70,True,False,0,0,0,False,False,False,same_as_baseline,False,False,0.041015625

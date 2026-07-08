@@ -48,6 +48,14 @@ from qdsv.problems.process_data import compile_process_data_spec  # noqa: E402
 from qdsv.qpython.compiler import compile_qpython_source  # noqa: E402
 
 
+GUARD_MIN_RISK_REDUCTION = 120
+GUARD_MAX_CONFIDENCE_DROP = 100
+GUARD_MIN_QDSV_MARGIN = 25
+GUARD_HIGH_CONFIDENCE = 800
+GUARD_SINGLETON_EXTRA_RISK_REDUCTION = 260
+GUARD_SINGLETON_MAX_CONFIDENCE_DROP = 50
+
+
 QINTENT_SOURCE = """
 find_rows("candidate_index")
   .using_structured_semantic_score([
@@ -85,6 +93,49 @@ def _score_margin(result: dict[str, Any]) -> float:
     if len(scores) < 2:
         return 1000.0
     return scores[0] - scores[1]
+
+
+def _guarded_selection(
+    baseline: Any,
+    selected: dict[str, Any],
+    *,
+    qdsv_margin: float,
+    evidence_insufficient: bool,
+) -> tuple[dict[str, Any], bool, str]:
+    """Conservative override policy using only observable decision evidence."""
+
+    baseline_row = baseline.to_dict() if hasattr(baseline, "to_dict") else dict(baseline)
+    selected_row = dict(selected)
+
+    if baseline_row.get("candidate_index") == selected_row.get("candidate_index"):
+        return selected_row, False, "same_as_baseline"
+
+    baseline_risk = int(baseline_row["logical_risk"])
+    selected_risk = int(selected_row["logical_risk"])
+    risk_delta = baseline_risk - selected_risk
+    confidence_drop = int(baseline_row["decoder_confidence"]) - int(selected_row["decoder_confidence"])
+
+    if evidence_insufficient:
+        return baseline_row, False, "reject_evidence_insufficient"
+    if qdsv_margin < GUARD_MIN_QDSV_MARGIN:
+        return baseline_row, False, "reject_low_qdsv_margin"
+    if risk_delta < GUARD_MIN_RISK_REDUCTION:
+        return baseline_row, False, "reject_insufficient_risk_reduction"
+    if confidence_drop > GUARD_MAX_CONFIDENCE_DROP:
+        return baseline_row, False, "reject_confidence_drop"
+
+    baseline_weight = int(baseline_row.get("candidate_weight", 99))
+    selected_weight = int(selected_row.get("candidate_weight", 99))
+    baseline_confidence = int(baseline_row["decoder_confidence"])
+    if (
+        baseline_confidence >= GUARD_HIGH_CONFIDENCE
+        and baseline_weight <= 1
+        and selected_weight > baseline_weight
+        and (risk_delta < GUARD_SINGLETON_EXTRA_RISK_REDUCTION or confidence_drop > GUARD_SINGLETON_MAX_CONFIDENCE_DROP)
+    ):
+        return baseline_row, False, "reject_high_confidence_singleton_guard"
+
+    return selected_row, True, "accept_guarded_override"
 
 
 @dataclass(frozen=True)
@@ -328,6 +379,21 @@ class RealLdpcEnsembleBenchmark:
                 + int(many_candidates)
                 + int(low_baseline_confidence)
             )
+            evidence_insufficient = uncertainty_flag_count >= 2
+            guarded, guarded_override_accepted, guarded_reason = _guarded_selection(
+                baseline,
+                selected,
+                qdsv_margin=qdsv_margin,
+                evidence_insufficient=evidence_insufficient,
+            )
+            raw_override_attempted = baseline["candidate_index"] != selected["candidate_index"]
+            guarded_override_rejected = raw_override_attempted and not guarded_override_accepted
+            raw_risk_delta = int(baseline["logical_risk"]) - int(selected["logical_risk"])
+            raw_exact_delta = int(bool(selected["exact_correction"])) - int(bool(baseline["exact_correction"]))
+            raw_failure_delta = int(bool(baseline["logical_failure_proxy"])) - int(bool(selected["logical_failure_proxy"]))
+            guarded_risk_delta = int(baseline["logical_risk"]) - int(guarded["logical_risk"])
+            guarded_exact_delta = int(bool(guarded["exact_correction"])) - int(bool(baseline["exact_correction"]))
+            guarded_failure_delta = int(bool(baseline["logical_failure_proxy"])) - int(bool(guarded["logical_failure_proxy"]))
 
             rows_out.append(
                 {
@@ -339,14 +405,35 @@ class RealLdpcEnsembleBenchmark:
                     "baseline_exact": bool(baseline["exact_correction"]),
                     "baseline_failure": bool(baseline["logical_failure_proxy"]),
                     "baseline_logical_risk": int(baseline["logical_risk"]),
+                    "qdsv_raw_method": selected["decoder_method"],
+                    "qdsv_raw_qubits": selected["correction_qubits"],
+                    "qdsv_raw_exact": bool(selected["exact_correction"]),
+                    "qdsv_raw_failure": bool(selected["logical_failure_proxy"]),
+                    "qdsv_raw_logical_risk": int(selected["logical_risk"]),
                     "qdsv_method": selected["decoder_method"],
                     "qdsv_qubits": selected["correction_qubits"],
                     "qdsv_exact": bool(selected["exact_correction"]),
                     "qdsv_failure": bool(selected["logical_failure_proxy"]),
                     "qdsv_logical_risk": int(selected["logical_risk"]),
-                    "risk_delta": int(baseline["logical_risk"]) - int(selected["logical_risk"]),
-                    "exact_delta": int(bool(selected["exact_correction"])) - int(bool(baseline["exact_correction"])),
-                    "failure_delta": int(bool(baseline["logical_failure_proxy"])) - int(bool(selected["logical_failure_proxy"])),
+                    "risk_delta": raw_risk_delta,
+                    "exact_delta": raw_exact_delta,
+                    "failure_delta": raw_failure_delta,
+                    "qdsv_guarded_method": guarded["decoder_method"],
+                    "qdsv_guarded_qubits": guarded["correction_qubits"],
+                    "qdsv_guarded_exact": bool(guarded["exact_correction"]),
+                    "qdsv_guarded_failure": bool(guarded["logical_failure_proxy"]),
+                    "qdsv_guarded_logical_risk": int(guarded["logical_risk"]),
+                    "guarded_risk_delta": guarded_risk_delta,
+                    "guarded_exact_delta": guarded_exact_delta,
+                    "guarded_failure_delta": guarded_failure_delta,
+                    "raw_override_attempted": bool(raw_override_attempted),
+                    "guarded_override_accepted": bool(guarded_override_accepted),
+                    "guarded_override_rejected": bool(guarded_override_rejected),
+                    "guarded_reason": guarded_reason,
+                    "raw_bad_override": bool(raw_risk_delta < 0 or raw_exact_delta < 0 or raw_failure_delta < 0),
+                    "guarded_bad_override": bool(guarded_risk_delta < 0 or guarded_exact_delta < 0 or guarded_failure_delta < 0),
+                    "raw_successful_override": bool(raw_override_attempted and raw_risk_delta > 0 and raw_exact_delta >= 0 and raw_failure_delta >= 0),
+                    "guarded_successful_override": bool(guarded_override_accepted and guarded_risk_delta > 0 and guarded_exact_delta >= 0 and guarded_failure_delta >= 0),
                     "candidate_count": len(rows),
                     "decoder_method_count": method_count,
                     "baseline_confidence": baseline_confidence,
@@ -356,7 +443,7 @@ class RealLdpcEnsembleBenchmark:
                     "uncertainty_many_candidates": many_candidates,
                     "uncertainty_low_baseline_confidence": low_baseline_confidence,
                     "uncertainty_flag_count": uncertainty_flag_count,
-                    "evidence_insufficient_flag": uncertainty_flag_count >= 2,
+                    "evidence_insufficient_flag": evidence_insufficient,
                     "timing_decode_ms": float(decode_ms),
                     "timing_candidate_ms": float(candidate_ms),
                     "timing_qdsv_ms": float(qdsv_ms),
@@ -379,15 +466,30 @@ def _seed_metrics(seed: int, attempts: int, frame: pd.DataFrame) -> dict[str, An
         "attempts": int(attempts),
         "bp_exact_rate": _rate(frame["baseline_exact"]),
         "qdsv_exact_rate": _rate(frame["qdsv_exact"]),
+        "qdsv_guarded_exact_rate": _rate(frame["qdsv_guarded_exact"]),
         "bp_failure_proxy_rate": _rate(frame["baseline_failure"]),
         "qdsv_failure_proxy_rate": _rate(frame["qdsv_failure"]),
+        "qdsv_guarded_failure_proxy_rate": _rate(frame["qdsv_guarded_failure"]),
         "bp_avg_logical_risk": float(frame["baseline_logical_risk"].mean()),
         "qdsv_avg_logical_risk": float(frame["qdsv_logical_risk"].mean()),
+        "qdsv_guarded_avg_logical_risk": float(frame["qdsv_guarded_logical_risk"].mean()),
         "avg_risk_delta": float(frame["risk_delta"].mean()),
+        "avg_guarded_risk_delta": float(frame["guarded_risk_delta"].mean()),
         "improved_risk_count": int((frame["risk_delta"] > 0).sum()),
         "worse_risk_count": int((frame["risk_delta"] < 0).sum()),
+        "guarded_improved_risk_count": int((frame["guarded_risk_delta"] > 0).sum()),
+        "guarded_worse_risk_count": int((frame["guarded_risk_delta"] < 0).sum()),
         "avg_exact_delta": float(frame["exact_delta"].mean()),
+        "avg_guarded_exact_delta": float(frame["guarded_exact_delta"].mean()),
         "avg_failure_delta": float(frame["failure_delta"].mean()),
+        "avg_guarded_failure_delta": float(frame["guarded_failure_delta"].mean()),
+        "raw_override_rate": _rate(frame["raw_override_attempted"]),
+        "guarded_override_accept_rate": _rate(frame["guarded_override_accepted"]),
+        "guarded_override_reject_rate": _rate(frame["guarded_override_rejected"]),
+        "raw_bad_override_rate": _rate(frame["raw_bad_override"]),
+        "guarded_bad_override_rate": _rate(frame["guarded_bad_override"]),
+        "raw_successful_override_rate": _rate(frame["raw_successful_override"]),
+        "guarded_successful_override_rate": _rate(frame["guarded_successful_override"]),
         "evidence_insufficient_rate": _rate(frame["evidence_insufficient_flag"]),
         "avg_qdsv_score_margin": float(frame["qdsv_score_margin"].mean()),
         "avg_timing_decode_ms": float(frame["timing_decode_ms"].mean()),
@@ -401,13 +503,26 @@ def _aggregate(seed_metrics: list[dict[str, Any]]) -> dict[str, Any]:
     keys = [
         "bp_exact_rate",
         "qdsv_exact_rate",
+        "qdsv_guarded_exact_rate",
         "bp_failure_proxy_rate",
         "qdsv_failure_proxy_rate",
+        "qdsv_guarded_failure_proxy_rate",
         "bp_avg_logical_risk",
         "qdsv_avg_logical_risk",
+        "qdsv_guarded_avg_logical_risk",
         "avg_risk_delta",
+        "avg_guarded_risk_delta",
         "avg_exact_delta",
+        "avg_guarded_exact_delta",
         "avg_failure_delta",
+        "avg_guarded_failure_delta",
+        "raw_override_rate",
+        "guarded_override_accept_rate",
+        "guarded_override_reject_rate",
+        "raw_bad_override_rate",
+        "guarded_bad_override_rate",
+        "raw_successful_override_rate",
+        "guarded_successful_override_rate",
         "evidence_insufficient_rate",
         "avg_qdsv_score_margin",
         "avg_timing_decode_ms",
@@ -420,6 +535,8 @@ def _aggregate(seed_metrics: list[dict[str, Any]]) -> dict[str, Any]:
         "total_samples": int(sum(item["samples"] for item in seed_metrics)),
         "total_improved_risk_count": int(sum(item["improved_risk_count"] for item in seed_metrics)),
         "total_worse_risk_count": int(sum(item["worse_risk_count"] for item in seed_metrics)),
+        "total_guarded_improved_risk_count": int(sum(item["guarded_improved_risk_count"] for item in seed_metrics)),
+        "total_guarded_worse_risk_count": int(sum(item["guarded_worse_risk_count"] for item in seed_metrics)),
     }
     for key in keys:
         values = [float(item[key]) for item in seed_metrics]
