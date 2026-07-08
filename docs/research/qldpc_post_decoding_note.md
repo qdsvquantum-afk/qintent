@@ -222,6 +222,38 @@ The multi-seed run is more conservative than the single-seed example. It does no
 
 This supports a more careful claim: QDSV/QIntent appears useful as a risk-aware post-decoding decision layer over BP-soft candidates, especially when the objective includes risk reduction and auditability rather than exact correction alone.
 
+### External `ldpc` Decoder Ensemble Recovery
+
+The next benchmark uses the external `ldpc` package rather than only the notebook BP implementation. The experiment constructs sparse parity-check matrices and obtains candidate corrections from:
+
+```text
+BpDecoder
+BpOsdDecoder
+BpLsdDecoder
+low-weight syndrome-compatible alternatives
+```
+
+This benchmark intentionally focuses on BP-failure / BP-ambiguity scenarios. BP is used as the baseline because the purpose is to test whether QDSV/QIntent can recover useful corrections when BP alone fails by deciding over a richer decoder ensemble. The result should not be read as a claim that QDSV outperforms BP+OSD as a standalone decoder.
+
+Across 8 seeds, the script collected 168 BP-failure scenarios.
+
+Aggregate summary:
+
+| Metric | BP-only baseline | QDSV over LDPC decoder ensemble |
+|---|---:|---:|
+| Exact correction rate, mean | 0.0000 | 0.5307 |
+| Exact correction rate, std | 0.0000 | 0.1642 |
+| Logical-failure proxy rate, mean | 0.4866 | 0.2420 |
+| Logical-failure proxy rate, std | 0.1706 | 0.1199 |
+| Average logical risk, mean | 165.02 | 129.14 |
+| Average logical risk, std | 50.45 | 28.75 |
+| Average risk delta, mean | - | 35.88 |
+| Average risk delta, std | - | 24.58 |
+| Improved-risk scenarios | - | 61/168 |
+| Worse-risk scenarios | - | 28/168 |
+
+This result is qualitatively different from the earlier toy BP-soft benchmark. Here QDSV/QIntent operates over outputs from real external decoders. It recovers exact corrections in a substantial fraction of BP-failure scenarios, reduces the logical-failure proxy by roughly half, and lowers average logical risk. However, it also introduces some worse-risk cases, which means the decision policy is not yet production-ready. This is useful evidence for the paper because it identifies both the contribution and the next tuning problem.
+
 ## Audit Trace
 
 For the selected QDSV correction, the public audit trace includes block-level evidence:
@@ -305,6 +337,10 @@ The multi-seed local benchmark script is available here:
 
 [scripts/qldpc_bp_soft_multiseed.py](scripts/qldpc_bp_soft_multiseed.py)
 
+The external `ldpc` decoder-ensemble recovery script is available here:
+
+[scripts/qldpc_ldpc_ensemble_recovery.py](scripts/qldpc_ldpc_ensemble_recovery.py)
+
 The notebooks generate:
 
 ```text
@@ -315,6 +351,9 @@ qdsv_qldpc_bp_soft_decoder_summary.csv
 qdsv_qldpc_bp_soft_multiseed_evidence.json
 qdsv_qldpc_bp_soft_multiseed_summary.csv
 qdsv_qldpc_bp_soft_multiseed_metrics.csv
+qdsv_qldpc_real_ldpc_ensemble_recovery_evidence.json
+qdsv_qldpc_real_ldpc_ensemble_recovery_summary.csv
+qdsv_qldpc_real_ldpc_ensemble_recovery_metrics.csv
 ```
 
 The generated evidence used for this note is archived in this repository:
@@ -326,6 +365,9 @@ The generated evidence used for this note is archived in this repository:
 - [evidence/qdsv_qldpc_bp_soft_multiseed_evidence.json](evidence/qdsv_qldpc_bp_soft_multiseed_evidence.json)
 - [evidence/qdsv_qldpc_bp_soft_multiseed_summary.csv](evidence/qdsv_qldpc_bp_soft_multiseed_summary.csv)
 - [evidence/qdsv_qldpc_bp_soft_multiseed_metrics.csv](evidence/qdsv_qldpc_bp_soft_multiseed_metrics.csv)
+- [evidence/qdsv_qldpc_real_ldpc_ensemble_recovery_evidence.json](evidence/qdsv_qldpc_real_ldpc_ensemble_recovery_evidence.json)
+- [evidence/qdsv_qldpc_real_ldpc_ensemble_recovery_summary.csv](evidence/qdsv_qldpc_real_ldpc_ensemble_recovery_summary.csv)
+- [evidence/qdsv_qldpc_real_ldpc_ensemble_recovery_metrics.csv](evidence/qdsv_qldpc_real_ldpc_ensemble_recovery_metrics.csv)
 
 The QIntent public preview endpoint used in the notebook exposes:
 
@@ -341,5 +383,7 @@ The controlled benchmark supports the hypothesis that QDSV/QIntent can act as a 
 The BP-soft follow-up adds a more realistic signal source: posterior evidence from a message-passing decoder. In that toy benchmark, QDSV/QIntent improved exact correction rate from 0.725 to 0.875, reduced average logical risk from 153.05 to 109.80, and did not increase the logical-failure proxy.
 
 The multi-seed run gives a more stable view: across 480 scenarios, QDSV/QIntent reduced average logical risk from 141.12 to 110.80, produced 74 improved-risk selections, and produced no worse-risk selections under this benchmark configuration. Exact correction and failure proxy showed smaller average improvements and varied by seed.
+
+The external `ldpc` ensemble recovery benchmark gives the strongest evidence so far that QDSV/QIntent is not merely reproducing a toy BP pipeline. In BP-failure scenarios, QDSV/QIntent selected across BP, BP+OSD, BP+LSD and compatible alternatives, recovering exact corrections in 53.1% of collected BP-failure cases and reducing the logical-failure proxy from 48.7% to 24.2%. This comes with a remaining policy-tuning challenge, since 28/168 cases showed worse logical-risk selection.
 
 The result is not yet evidence of production qLDPC decoder superiority. It is evidence that the QDSV structured semantic decision layer is capable of using decoder confidence, decoder margin, logical-risk and safety evidence to re-rank decoder-generated candidates in a reproducible and auditable way.
