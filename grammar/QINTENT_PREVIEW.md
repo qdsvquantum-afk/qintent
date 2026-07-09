@@ -22,7 +22,7 @@ find_rows("candidate_index").where_any(["risk_ok", "manual_review_ok"])
 find_rows("candidate_index").rank_by("score").top_k(10)
 find_rows("candidate_index").using_decision_model([...]).accept_if(threshold=850).rank().top_k(10)
 find_rows("candidate_index").using_semantic_score([...], risk_adjustment="risk").accept_if(threshold=850).rank().top_k(10)
-find_rows("candidate_index").using_structured_semantic_score([...], global_risk="risk", profile="qldpc_post_decoding").accept_if(threshold=850).rank().top_k(10)
+find_rows("candidate_index").using_structured_semantic_score([...], global_risk="risk", profile="business_case_review").accept_if(threshold=850).rank().top_k(10)
 ```
 
 ### Decision model
@@ -62,12 +62,12 @@ Use it when each candidate already has comparable evidence fields, operational i
 ```python
 find_rows("candidate_index")
   .using_semantic_score([
-      signal("syndrome_support", influence=30, priority=2),
-      signal("logical_preservation", influence=30, priority=3),
-      signal("decoder_confidence", influence=20, priority=1),
-      signal("propagation_safety", influence=10, priority=2),
-      signal("distance_safety", influence=10, priority=3),
-  ], risk_adjustment="logical_risk")
+      signal("data_quality", influence=30, priority=2),
+      signal("business_fit", influence=30, priority=3),
+      signal("delivery_confidence", influence=20, priority=1),
+      signal("process_safety", influence=10, priority=2),
+      signal("implementation_readiness", influence=10, priority=3),
+  ], risk_adjustment="execution_risk")
   .accept_if(threshold=780)
   .rank()
   .top_k(5)
@@ -90,21 +90,21 @@ Use it when candidates are naturally evaluated through groups of evidence, local
 ```python
 find_rows("candidate_index")
   .using_structured_semantic_score([
-      block("syndrome", [
-          signal("syndrome_support", influence=30, priority=2),
-          signal("check_consistency", influence=20, priority=1),
-      ], influence=30, priority=2, risk_adjustment="syndrome_risk", adjustments=[
-          adjustment("syndrome_entropy_adjustment", influence=5),
+      block("data_quality", [
+          signal("data_completeness", influence=30, priority=2),
+          signal("data_consistency", influence=20, priority=1),
+      ], influence=30, priority=2, risk_adjustment="data_risk", adjustments=[
+          adjustment("data_quality_adjustment", influence=5),
       ]),
-      block("logical_safety", [
-          signal("logical_preservation", influence=40, priority=3),
-          signal("distance_safety", influence=20, priority=2),
-      ], influence=40, priority=3, risk_adjustment="logical_risk"),
-      block("decoder", [
-          signal("decoder_confidence", influence=25, priority=1),
-          signal("propagation_safety", influence=15, priority=2),
+      block("business_value", [
+          signal("business_value", influence=40, priority=3),
+          signal("implementation_readiness", influence=20, priority=2),
+      ], influence=40, priority=3, risk_adjustment="execution_risk"),
+      block("delivery", [
+          signal("delivery_confidence", influence=25, priority=1),
+          signal("operational_safety", influence=15, priority=2),
       ], influence=30, priority=1),
-  ], global_risk="logical_risk", profile="qldpc_post_decoding")
+  ], global_risk="execution_risk", profile="business_case_review")
   .accept_if(threshold=600)
   .rank()
   .top_k(5)

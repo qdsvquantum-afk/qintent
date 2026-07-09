@@ -13,3 +13,13 @@ build/
 !.env.example
 .DS_Store
 Thumbs.db
+
+# Private/unpublished research artifacts must not be published from this SDK repo.
+docs/research/evidence/
+docs/research/scripts/
+docs/research/papers/
+docs/research/*qldpc*
+docs/research/*ldpc*
+notebooks/qldpc_*.ipynb
+examples/*qldpc*.py
+examples/*ldpc*.py
