@@ -50,6 +50,7 @@ compilation, explanation, execution results, and semantic execution evidence.
    bridge_qiskit
    public_scope
    api
+   GitHub <https://github.com/qdsvquantum-afk/qintent>
 
 Project links
 -------------
