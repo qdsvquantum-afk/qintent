@@ -28,8 +28,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://qintent.qdsv.cloud"
-Documentation = "https://qintent.qdsv.cloud"
+Homepage = "https://qdsvquantum-afk.github.io/qintent/"
+Documentation = "https://qdsvquantum-afk.github.io/qintent/"
 Source = "https://github.com/qdsvquantum-afk/qintent"
 
 [project.scripts]

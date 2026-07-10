@@ -5,6 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-developer%20preview-0ea5e9.svg)](#public-preview-limits)
 
+Documentation site: https://qdsvquantum-afk.github.io/qintent/
+
 QIntent is the native intent-first language for **QDSV - Quantum Declarative Semantic Value**.
 
 It lets users declare computational intent over state spaces, operations, predicates, relations, rankings, distributions, rows and evidence. QDSV then decides how to represent and execute that intent.
