@@ -15,11 +15,12 @@ It lets users declare computational intent over state spaces, operations, predic
 problem intent
 -> semantic representation
 -> state space / operation / predicate / relation
+-> QDSV Operation Compiler v1
 -> execution route
 -> evidence
 ```
 
-QIntent does not start from manually written circuits. The public SDK defaults to the QDSV QuEST/statevector route, which is designed to execute declared state-space intent without user-written circuits. Circuit materialization appears only when an enabled backend requires it.
+QIntent does not start from manually written circuits and does not own a separate compiler. It produces canonical problem intent for QDSV Operation Compiler v1. QuEST, Aer, IBM-oriented materialization and Bridge exports must consume the same operation program and digest; circuit materialization appears only when an enabled backend requires it.
 
 ## 5 Minute Quickstart
 
@@ -104,6 +105,8 @@ client.compile(source, rows=None, backend="quest")
 client.explain(source, rows=None, backend="quest")
 client.run(source, rows=None, backend="quest")
 ```
+
+`compile()` responses include a safe `operation_program` passport with compiler version, digest, required capabilities, resource status and verification status. Private lowering operands and formulas are not exposed.
 
 ## Supported Preview Patterns
 
