@@ -4,6 +4,7 @@ import csv
 import os
 from pathlib import Path
 from typing import Any, Mapping, Sequence
+from urllib.parse import quote
 
 import requests
 
@@ -11,7 +12,7 @@ from .exceptions import QIntentAPIError, QIntentHTTPError
 
 
 DEFAULT_API_URL = "https://api.qdsv.cloud/api"
-SDK_VERSION = "0.1.11"
+SDK_VERSION = "0.2.0"
 PRIVATE_NODE_UNAVAILABLE_MESSAGE = (
     "Private QDSV node temporarily unavailable. It may be offline, reserved for "
     "private processing, or busy. Try again later or use QIntentClient() for "
@@ -120,6 +121,10 @@ class QIntentClient:
     def spec(self) -> dict[str, Any]:
         return self._request("GET", "/qintent/spec")
 
+    def capabilities(self) -> dict[str, Any]:
+        """Return the canonical operation and ScoreModel capability contract."""
+        return self._request("GET", "/qintent/capabilities")
+
     def examples(self) -> list[dict[str, Any]]:
         payload = self._request("GET", "/qintent/examples")
         examples = payload.get("examples", [])
@@ -155,6 +160,63 @@ class QIntentClient:
             json=self._payload(source, rows=rows, backend=backend, backend_mode=backend_mode, shots=shots),
         )
 
+    def compile_hardware(
+        self,
+        source: str,
+        *,
+        rows: Sequence[Mapping[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        """Compile QIntent for IBM hardware without submitting a job."""
+
+        return self._request(
+            "POST",
+            "/product/qpython/compile",
+            json=self._hardware_payload(source, rows=rows),
+        )
+
+    def submit_hardware(
+        self,
+        source: str,
+        *,
+        rows: Sequence[Mapping[str, Any]] | None = None,
+        backend_name: str = "least_busy",
+        instance: str | None = None,
+        shots: int = 1024,
+        mode: str = "amplified_oracle",
+        optimization_level: int = 1,
+    ) -> dict[str, Any]:
+        """Preflight and submit the same canonical QIntent program to IBM."""
+
+        if not self.license_key:
+            raise QIntentAPIError("QDSV_LICENSE_KEY is required for IBM hardware submission")
+        preflight = self.compile_hardware(source, rows=rows)
+        self._assert_hardware_ready(preflight)
+        payload = self._hardware_payload(source, rows=rows)
+        payload.update(
+            {
+                "backend_name": backend_name,
+                "shots": shots,
+                "mode": mode,
+                "optimization_level": optimization_level,
+            }
+        )
+        if instance:
+            payload["instance"] = instance
+        return self._request("POST", "/product/qpython/quantum/sample", json=payload)
+
+    def hardware_job(self, job_id: str, *, live_poll: bool = True) -> dict[str, Any]:
+        """Return the current state and public evidence for a submitted job."""
+
+        suffix = "?live_poll=true" if live_poll else ""
+        return self._request("GET", f"/product/hardware/jobs/{quote(job_id, safe='')}{suffix}")
+
+    def cancel_hardware_job(self, job_id: str, *, reason: str = "user_requested_from_sdk") -> dict[str, Any]:
+        return self._request(
+            "POST",
+            f"/product/hardware/jobs/{quote(job_id, safe='')}/cancel",
+            json={"reason": reason},
+        )
+
     def explain(
         self,
         source: str,
@@ -188,6 +250,38 @@ class QIntentClient:
         )
 
     execute = run
+
+    def _hardware_payload(
+        self,
+        source: str,
+        *,
+        rows: Sequence[Mapping[str, Any]] | None,
+    ) -> dict[str, Any]:
+        payload: dict[str, Any] = {
+            "source": source,
+            "target": "quantum_hardware",
+            "auth": {
+                "license_key": self.license_key,
+                "sdk_name": self.sdk_name,
+            },
+        }
+        if rows is not None:
+            payload["rows"] = [dict(row) for row in rows]
+        return payload
+
+    @staticmethod
+    def _assert_hardware_ready(preflight: Mapping[str, Any]) -> None:
+        program = preflight.get("operation_program")
+        if not isinstance(program, Mapping):
+            raise QIntentAPIError("Hardware preflight did not return a canonical operation program")
+        if program.get("answer_precomputed") is True:
+            raise QIntentAPIError("Hardware submission refused because the answer was precomputed")
+        if program.get("circuit_ready") is not True:
+            missing = program.get("missing_capabilities") or []
+            raise QIntentAPIError(
+                "Canonical QIntent program is not circuit-ready"
+                + (f": {missing}" if missing else "")
+            )
 
     @staticmethod
     def read_csv(path: str | Path) -> list[dict[str, Any]]:

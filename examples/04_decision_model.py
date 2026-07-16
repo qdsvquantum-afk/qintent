@@ -11,14 +11,12 @@ rows = [
 
 source = """
 find_rows("candidate_index")
-  .using_decision_model([
-      criterion("credit_score_norm", importance=25, priority=1),
-      criterion("default_score", importance=25, priority=1),
-      criterion("debt_burden_score", importance=20, priority=1),
-  ])
-  .accept_if(threshold=850)
-  .rank()
-  .top_k(10)
+  .using_score_model([
+      score_term("credit_score_norm", importance=25, priority=1),
+      score_term("default_score", importance=25, priority=1),
+      score_term("debt_burden_score", importance=20, priority=1),
+  ], penalty=0)
+  .accept_if(threshold=850, decision="gte")
 """
 
 result = client.run(source, rows=rows)

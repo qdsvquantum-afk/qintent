@@ -1,212 +1,73 @@
 # QIntent Public Preview Grammar
 
-This document describes the stable public preview subset exposed by the `qdsv-qintent` SDK.
+QIntent is a declarative language for producing canonical QDSV problem intent. It does not execute arbitrary Python and does not own a separate compiler.
 
-QIntent is a declarative quantum-intent language for expressing computational intent over state spaces, operations, predicates, relations, transformations, rows, ranking, sampling, and evidence.
+## Canonical route
 
-The syntax is Python-inspired for developer ergonomics. The semantics are QDSV-native: state spaces, operations, predicates, relations, transformations, ranking, sampling, evidence, and backend-independent execution intent.
-
-## Semantic scope
-
-The public preview exposes a safe subset first. Row selection, ranking, `using_decision_model(...)` and `using_semantic_score(...)` are supported operations, not the full ceiling of the QDSV model.
-
-At the model level, QDSV is designed to represent computable semantics as operations, predicates, relations, transformations, observations, distributions, constraints, and evidence over state spaces. Circuit materialization is a backend-dependent representation, not the starting point of the language.
-
-## Row selection
-
-```python
-find_rows("candidate_index").where("score", ">=", 850)
-find_rows("candidate_index").where_between("amount", 1000, 5000)
-find_rows("candidate_index").where_all(["risk_ok", "income_ok"])
-find_rows("candidate_index").where_any(["risk_ok", "manual_review_ok"])
-find_rows("candidate_index").rank_by("score").top_k(10)
-find_rows("candidate_index").using_decision_model([...]).accept_if(threshold=850).rank().top_k(10)
-find_rows("candidate_index").using_semantic_score([...], risk_adjustment="risk").accept_if(threshold=850).rank().top_k(10)
-find_rows("candidate_index").using_structured_semantic_score([...], global_risk="risk", profile="business_case_review").accept_if(threshold=850).rank().top_k(10)
+```text
+QIntent -> ProblemSpec -> Operation Compiler v2 -> QuantumCanonicalProgram
 ```
 
-### Decision model
+The same program can be realized through QuEST, a reversible circuit for Aer/IBM, or an export surface such as Bridge.
 
-`using_decision_model(...)` declares a prebuilt QDSV decision operation over prepared criteria without exposing the internal formula.
-
-Each criterion is a prepared value: a comparable, oriented value that represents something meaningful about the process. This lets the prebuilt decision operation work across different domains without hard-coding those domains into the language.
-
-```python
-find_rows("candidate_index")
-  .using_decision_model([
-      criterion("credit_score_norm", importance=25, priority=1),
-      criterion("default_score", importance=25, priority=1),
-      criterion("debt_burden_score", importance=20, priority=1),
-  ])
-  .accept_if(threshold=850)
-  .rank()
-  .top_k(10)
-```
-
-Each `criterion(...)` uses:
-
-- `field`: prepared signal column.
-- `importance`: semantic influence of the criterion.
-- `priority`: optional priority modifier, defaulting to `1`.
-
-QDSV maps the criteria internally into a state-space representation for selection, ranking, confidence, and evidence. The internal formula is not part of the public QIntent grammar.
-
-Typical mappings start from raw data and convert it into comparable prepared values before QIntent evaluates or ranks candidates.
-
-### Semantic score
-
-`using_semantic_score(...)` declares an advanced QDSV semantic scoring operation over prepared signals without exposing the internal formula.
-
-Use it when each candidate already has comparable evidence fields, operational influence, priority, and an optional prepared risk adjustment.
-
-```python
-find_rows("candidate_index")
-  .using_semantic_score([
-      signal("data_quality", influence=30, priority=2),
-      signal("business_fit", influence=30, priority=3),
-      signal("delivery_confidence", influence=20, priority=1),
-      signal("process_safety", influence=10, priority=2),
-      signal("implementation_readiness", influence=10, priority=3),
-  ], risk_adjustment="execution_risk")
-  .accept_if(threshold=780)
-  .rank()
-  .top_k(5)
-```
-
-Each `signal(...)` uses:
-
-- `field`: prepared signal column.
-- `influence`: operational influence of the signal.
-- `priority`: optional priority modifier, defaulting to `1`.
-
-`risk_adjustment` may be a prepared field name or a numeric constant. QDSV uses it internally as a controlled risk adjustment while keeping the private scoring representation inside the runtime.
-
-### Structured semantic score
-
-`using_structured_semantic_score(...)` declares an advanced QDSV structured scoring operation over prepared signal blocks without exposing the internal hierarchical or nonlinear formula.
-
-Use it when candidates are naturally evaluated through groups of evidence, local risk, global risk and prepared adjustment fields.
-
-```python
-find_rows("candidate_index")
-  .using_structured_semantic_score([
-      block("data_quality", [
-          signal("data_completeness", influence=30, priority=2),
-          signal("data_consistency", influence=20, priority=1),
-      ], influence=30, priority=2, risk_adjustment="data_risk", adjustments=[
-          adjustment("data_quality_adjustment", influence=5),
-      ]),
-      block("business_value", [
-          signal("business_value", influence=40, priority=3),
-          signal("implementation_readiness", influence=20, priority=2),
-      ], influence=40, priority=3, risk_adjustment="execution_risk"),
-      block("delivery", [
-          signal("delivery_confidence", influence=25, priority=1),
-          signal("operational_safety", influence=15, priority=2),
-      ], influence=30, priority=1),
-  ], global_risk="execution_risk", profile="business_case_review")
-  .accept_if(threshold=600)
-  .rank()
-  .top_k(5)
-```
-
-Each `block(...)` uses:
-
-- `name`: public operational block name.
-- `signals`: list of `signal(...)` prepared fields.
-- `influence`: operational influence of the block.
-- `priority`: optional priority modifier, defaulting to `1`.
-- `risk_adjustment`: optional prepared field name or numeric constant.
-- `adjustments`: optional list of prepared `adjustment(...)` fields.
-
-Each `adjustment(...)` uses:
-
-- `field`: prepared adjustment column.
-- `influence`: operational influence of the adjustment.
-
-The public API exposes declared blocks, signals, risk fields and evidence outputs. The private QDSV hierarchical/nonlinear scoring representation remains inside the runtime.
-
-## Domain search
+## State spaces and queries
 
 ```python
 x = domain(0, 15)
-find(x).where(x in [3, 6, 9])
+find(x).where(and_(gte(x, 3), eq(mod(x, 2), 0)))
+
+find_rows("candidate_index").where("score", ">=", 850)
+find_rows("candidate_index").where_between("amount", 1000, 5000)
+find_rows("candidate_index").where_all(["risk_ok", "income_ok"])
 ```
 
-`range(...)` is accepted as a familiar alias in the public preview.
+## ScoreModel v2
 
-## Expression ergonomics
-
-Supported preview syntax:
-
-- `not`
-- `in`
-- `not in`
-- chained comparisons such as `700 <= score <= 950`
-- `all([...])`
-- `any([...])`
-- `abs(...)`
-- `round(...)`
-- `floor(...)`
-- `ceil(...)`
-- `sign(...)`
-- `min(...)`
-- `max(...)`
-- `clip(value, minimum, maximum)`
-- `clamp(value, minimum, maximum)`
-- `between(value, minimum, maximum)`
-- `outside(value, minimum, maximum)`
-- `abs_diff(left, right)`
-- `squared_diff(left, right)`
-- `similarity(left, right)`
-- `vector_similarity(left_vector, right_vector)`
-- `within_similarity(left, right, threshold)`
-- `within_vector_similarity(left_vector, right_vector, threshold)`
-- `within_tolerance(left, right, tolerance)`
-- `safe_div(numerator, denominator[, default])`
-- `ratio(numerator, denominator)`
-- `percent(part, total)`
-- `is_null(value)`
-- `not_null(value)`
-- `coalesce(value, fallback, ...)`
-- `default_if_invalid(value, fallback)`
-- `sum_fields([value_a, value_b, ...])`
-- `mean_fields([value_a, value_b, ...])`
-- `weighted_sum([value_a, value_b, ...], [weight_a, weight_b, ...])`
-
-These are QDSV primitives, not arbitrary Python built-ins. They are intended for bounded predicates, safe numeric handling, tolerance checks, semantic relations, null handling, and row-level signal aggregation.
-
-Example:
+Flat:
 
 ```python
-i = domain(0, 9)
-gap = abs_diff(field(i, "amount_a"), field(i, "amount_b"))
-quality = coalesce(field(i, "quality"), 0)
-score = weighted_sum([quality, max(0, 1000 - gap)], [0.6, 0.4])
-find(i).where(within_tolerance(field(i, "amount_a"), field(i, "amount_b"), 5) and between(score, 700, 1000))
+find_rows("candidate_index")
+  .using_score_model([
+      score_term("quality", importance=30, priority=2, adjustments=[
+          score_adjustment("context", coefficient=0.10),
+      ]),
+      score_term("benefit", importance=40, priority=3),
+  ], penalty=0.05)
+  .accept_if(threshold=780, decision="gte")
 ```
 
-Semantic similarity example:
+Hierarchical:
 
 ```python
-i = domain(0, 9)
-sim = similarity(field(i, "reference_a"), field(i, "reference_b"))
-find(i).where(sim >= 850).rank_by(sim).top_k(10)
+find_rows("candidate_index")
+  .using_hierarchical_score_model([
+      score_block("value", [
+          score_term("quality", importance=30, priority=2),
+          score_term("benefit", importance=40, priority=3),
+      ], importance=60, priority=2, penalty=0.02),
+      score_block("risk", [
+          score_term("risk_fit", importance=30, priority=3),
+      ], importance=40, priority=3, penalty=0.05),
+  ], penalty=0.03)
+  .accept_if(threshold=780, decision="gte")
 ```
 
-`similarity(...)` returns a prepared 0..1000 relation signal. It can become part of the intent, predicate, ranking objective, or decision-model input. On QuEST, QDSV can represent it through the semantic/statevector route without user-written circuits; circuit materialization is only used when a selected backend requires and supports it.
+A score term may be a prepared similarity or any bounded numeric value/expression. ScoreModel supports contextual adjustments, term composition, flat or hierarchical aggregation, penalties, normalization and threshold decisions. Ranking is a later workflow/query concern, not part of the formula.
 
-Quantum vector similarity example:
+## Canonical operations
 
-```python
-i = domain(0, 9)
-left_state = [field(i, "a1"), field(i, "a2"), field(i, "a3")]
-right_state = [field(i, "b1"), field(i, "b2"), field(i, "b3")]
-overlap = vector_similarity(left_state, right_state)
-find(i).where(overlap >= 850).rank_by(overlap).top_k(10)
+The public contract contains 43 operation identities:
+
+```text
+abs, abs_diff, add, and, between, ceil, clip, coalesce,
+default_if_invalid, div, eq, field, floor, gt, gte, in_set,
+is_null, lt, lte, max, mean_fields, min, mod, mul, ne, not,
+not_null, or, outside, percent, ratio, round, safe_div, sign,
+similarity, squared_diff, sub, sum_fields, vector,
+vector_similarity, weighted_sum, within_tolerance, xor
 ```
 
-`vector_similarity(...)` returns a 0..1000 normalized-overlap / fidelity score over equal-length numeric vectors. It is intended for prepared features, embeddings, amplitudes or state-like signals with comparable meaning.
+Use `and_(...)`, `or_(...)` and `not_(...)` when a Python reserved word cannot be used as a function name. Operator syntax such as `+`, `-`, `*`, `/`, `%`, comparisons, `and`, `or` and `not` is also normalized into these operation identities.
 
 ## Field access
 
@@ -215,53 +76,15 @@ field(x, "score")
 row["score"]
 ```
 
-## Not supported in the public preview
+Rows are attached through a bounded QDSV data binding. They are not scanned to precompute winning candidates before quantum materialization.
 
-QIntent is intentionally not full Python. The following are not supported:
+## Unsupported syntax
 
-- arbitrary imports
-- file or network access from QIntent source
-- classes
-- function definitions
+- imports, classes, function definitions or arbitrary Python
+- file/network access
 - unbounded loops
-- arbitrary Python execution
-- direct QDSV Runtime internals
-- direct hardware adapter internals
+- direct calls to private runtime, lowering or hardware adapters
 
-## Execution model
+## IBM execution
 
-The public SDK is a client. It sends QIntent source and optional data to the public API:
-
-```text
-write QIntent locally
-send to QDSV API
-compile / validate / execute remotely
-receive results and evidence
-```
-
-The SDK does not install QDSV Runtime locally.
-
-QDSV may execute QIntent directly through semantic/statevector routes when possible. Circuit materialization is optional and is used only when a selected backend requires it.
-
-## Explain model
-
-The public preview exposes `client.explain(...)` and `POST /api/qintent/explain`.
-
-`explain` returns a Semantic Execution Passport instead of executing the problem. The passport describes:
-
-- intent type
-- state-space source and size
-- predicate or decision-model shape
-- selected backend path
-- whether user-written circuits are required
-- whether backend circuit materialization is required
-- backend availability roles
-- source, predicate, IR, or process-data digests
-
-Default public narrative:
-
-```text
-QIntent -> QDSV -> QuEST/statevector -> no user-written circuits
-```
-
-`logical` may appear as an internal/dev/reference semantic validation role. IBM hardware execution is part of Qruba/full platform configurations and is not enabled by the public SDK preview.
+The SDK can compile and submit through licensed deployments. Submission is allowed only after the public operation program reports `circuit_ready=true` and `answer_precomputed=false`.

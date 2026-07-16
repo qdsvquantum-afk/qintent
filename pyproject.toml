@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "qdsv-qintent"
-version = "0.1.11"
+version = "0.2.0"
 description = "Lightweight Python client for QIntent, the QDSV-native semantic quantum-intent language."
 readme = "README.md"
 requires-python = ">=3.9"

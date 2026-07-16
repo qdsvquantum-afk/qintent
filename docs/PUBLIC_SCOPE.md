@@ -1,69 +1,39 @@
 # Public Scope
 
-This repository is the public Developer Preview for QIntent.
+This repository contains the MIT-licensed QIntent Developer Preview SDK, CLI, examples, notebooks, tests and public grammar.
 
-## Included under MIT
+## Included
 
-- Python SDK package: `qdsv-qintent`
-- CLI command: `qintent`
-- Public examples
-- VS Code/Jupyter and Colab notebooks
-- Tests for the public SDK surface
-- Public preview grammar notes
-- Documentation for using QIntent through the QDSV public API
-- QIntent Explain / Semantic Execution Passport
-- Controlled QDSV helpers for comparison, logic, ranges, tolerance, safe division, null handling, numeric bounds, and row-level signal aggregation
-- Decision-model declarations over prepared values through `using_decision_model(...)`
-- Semantic-score declarations over prepared signals through `using_semantic_score(...)`
-- Structured semantic-score declarations over prepared signal blocks through `using_structured_semantic_score(...)`
-- Documentation of QIntent's semantic scope: operations, predicates, relations, transformations, state spaces, distributions, and evidence
+- Validation, compilation, explanation and execution through QDSV APIs.
+- A public capability contract for all 43 canonical operations.
+- Flat and hierarchical ScoreModel v2 declarations.
+- Canonical hardware preflight and licensed IBM job submission/status helpers.
+- Public evidence and stable operation-program summaries.
 
 ## Not included
 
-The following components are not part of this repository:
+- QDSV Runtime or private semantic programs.
+- Reversible lowering implementation and optimization rules.
+- QuEST, Aer or IBM adapter internals.
+- Tokens, secrets, production configuration or private endpoints.
+- Arbitrary Python execution.
 
-- QDSV Runtime
-- CAP
-- Backend selector
-- Lowering and materialization layers
-- QuEST, Aer, IBM, or hardware adapters
-- Noise mitigation internals
-- Crypto internals
-- Advanced orchestration logic
-- Private endpoints
-- Secrets, keys, tokens, or production deployment configuration
-
-## Positioning
-
-QIntent is the public language and SDK layer. QDSV is the underlying semantic computation model and runtime. Qruba is the commercial platform built on top of QDSV.
-
-QIntent is not a circuit-authoring language. It is a quantum-intent language. QDSV can execute a problem without circuits through semantic/statevector routes when available, and can materialize circuits only when the selected backend requires them.
-
-The public preview intentionally exposes a bounded subset first. This should not be read as the ceiling of the QDSV model. At the model level, QDSV is designed to represent computable semantics as operations, predicates, relations, transformations, observations, distributions, constraints, and evidence over state spaces.
-
-The public decision-model syntax is one prebuilt operation inside that wider semantic space. Users declare prepared values, importance, priority, an acceptance rule, and ranking behavior. QDSV maps those values internally into selection, ranking, confidence, and evidence without exposing the private decision formula.
-
-The public semantic-score syntax is an advanced preview operation over prepared signals. Users declare signal names, influence, priority, and an optional risk adjustment. QDSV maps those declarations internally into controlled scoring, ranking and evidence outputs without exposing the private scoring formula.
-
-The public structured semantic-score syntax is an advanced preview operation over prepared signal blocks. Users declare block names, prepared signal names, operational influence, priority, optional local/global risk fields, optional prepared adjustments, and a profile name. QDSV maps those declarations internally into hierarchical evidence, ranking and audit outputs without exposing the private hierarchical or nonlinear scoring representation.
-
-The intended product architecture is:
+## Architecture
 
 ```text
-Open SDK
-Closed Runtime
-Public API
-Private Core
+QIntent
+-> ProblemSpec
+-> QDSV Operation Compiler v2
+-> QuantumCanonicalProgram
+-> QuEST or reversible circuit realization
+
+Bridge and Qruba consume this route; they do not define parallel semantics.
 ```
 
-## Data and availability policy
+ScoreModel is a canonical operation composition inside ProblemSpec. The public terms are value, importance, priority, contextual adjustments and penalties. Ranking and presentation remain workflow-level behavior.
 
-The public API is for lightweight examples, notebooks, and evaluation. It may enforce row, payload, backend, and execution limits.
+## Availability and data
 
-For larger datasets, sensitive data, or heavier workloads, use Qruba Cloud with an appropriate license or a private Docker/local QDSV node.
+Public APIs are intended for bounded examples and may enforce payload, row, execution and backend limits. IBM execution requires a licensed deployment, a user token saved by that deployment and provider capacity. Do not send sensitive data to a public preview endpoint.
 
-Private Docker/local nodes are availability-limited. If a private node is not reachable, it may be offline, reserved for private processing, or temporarily busy. This should be treated as limited availability, not as a public cloud outage.
-
-## Trademark note
-
-QDSV, QIntent, and Qruba names and marks are project marks of their respective owners. The MIT License for this repository does not grant trademark rights.
+QDSV, QIntent and Qruba are project marks. The MIT license does not grant trademark rights.

@@ -15,12 +15,12 @@ It lets users declare computational intent over state spaces, operations, predic
 problem intent
 -> semantic representation
 -> state space / operation / predicate / relation
--> QDSV Operation Compiler v1
+-> QDSV Operation Compiler v2
 -> execution route
 -> evidence
 ```
 
-QIntent does not start from manually written circuits and does not own a separate compiler. It produces canonical problem intent for QDSV Operation Compiler v1. QuEST, Aer, IBM-oriented materialization and Bridge exports must consume the same operation program and digest; circuit materialization appears only when an enabled backend requires it.
+QIntent does not start from manually written circuits and does not own a separate compiler. It produces canonical problem intent for QDSV Operation Compiler v2. QuEST, Aer, IBM-oriented materialization and Bridge exports must consume the same operation program and digest; circuit materialization appears only when an enabled backend requires it.
 
 ## 5 Minute Quickstart
 
@@ -99,11 +99,15 @@ This route keeps QIntent positioned as the problem-intent language and uses QDSV
 
 ```python
 client.spec()
+client.capabilities()
 client.examples()
 client.validate(source, rows=None, backend="quest")
 client.compile(source, rows=None, backend="quest")
 client.explain(source, rows=None, backend="quest")
 client.run(source, rows=None, backend="quest")
+client.compile_hardware(source, rows=None)
+client.submit_hardware(source, rows=None, backend_name="least_busy")
+client.hardware_job(job_id)
 ```
 
 `compile()` responses include a safe `operation_program` passport with compiler version, digest, required capabilities, resource status and verification status. Private lowering operands and formulas are not exposed.
@@ -115,9 +119,8 @@ client.run(source, rows=None, backend="quest")
 - `find_rows(...).where_all(...)`
 - `find_rows(...).where_any(...)`
 - `find_rows(...).rank_by(...).top_k(...)`
-- `find_rows(...).using_decision_model([...]).accept_if(...).rank().top_k(...)`
-- `find_rows(...).using_semantic_score([...], risk_adjustment=...).accept_if(...).rank().top_k(...)`
-- `find_rows(...).using_structured_semantic_score([...], global_risk=..., profile=...).accept_if(...).rank().top_k(...)`
+- `find_rows(...).using_score_model([...]).accept_if(...)`
+- `find_rows(...).using_hierarchical_score_model([...]).accept_if(...)`
 - `domain(...), range(...), find(...).where(...)`
 - `field(variable, column)` and `row["column"]`
 - `not`, `in`, `not in`, chained comparisons
@@ -130,160 +133,60 @@ client.run(source, rows=None, backend="quest")
 - `is_null(...)`, `not_null(...)`, `coalesce(...)`, `default_if_invalid(...)`
 - `sum_fields([...])`, `mean_fields([...])`, `weighted_sum([...], [...])`
 
+The capability contract reports exactly 43 canonical operations:
+
+```text
+abs, abs_diff, add, and, between, ceil, clip, coalesce,
+default_if_invalid, div, eq, field, floor, gt, gte, in_set,
+is_null, lt, lte, max, mean_fields, min, mod, mul, ne, not,
+not_null, or, outside, percent, ratio, round, safe_div, sign,
+similarity, squared_diff, sub, sum_fields, vector,
+vector_similarity, weighted_sum, within_tolerance, xor
+```
+
 See [grammar/QINTENT_PREVIEW.md](grammar/QINTENT_PREVIEW.md) for public preview grammar notes.
 
-## Decision Model Operation
+## ScoreModel v2
 
-QIntent can express a prebuilt QDSV decision model without exposing the internal formula.
+ScoreModel v2 is the canonical QDSV composition for bounded multi-criteria decisions. A term can read a prepared similarity value or any bounded numeric value produced by another canonical operation. The public names are `importance` and `priority`.
 
-Users declare criteria, importance, priority, an acceptance rule and ranking behavior. Each criterion is a prepared value: a comparable, oriented value that represents something meaningful about a process.
-
-```python
-from qintent import QIntentClient
-
-client = QIntentClient()
-
-rows = [
-    {"candidate_index": 0, "credit_score_norm": 780, "default_score": 1000, "debt_burden_score": 900},
-    {"candidate_index": 1, "credit_score_norm": 700, "default_score": 700, "debt_burden_score": 700},
-    {"candidate_index": 2, "credit_score_norm": 950, "default_score": 1000, "debt_burden_score": 980},
-]
-
-source = """
-find_rows("candidate_index")
-  .using_decision_model([
-      criterion("credit_score_norm", importance=25, priority=1),
-      criterion("default_score", importance=25, priority=1),
-      criterion("debt_burden_score", importance=20, priority=1),
-  ])
-  .accept_if(threshold=850)
-  .rank()
-  .top_k(10)
-"""
-
-result = client.run(source, rows=rows)
-print(result["result"]["selected_rows"])
-```
-
-Use this operation when a problem is better represented as a multi-signal decision than as a single threshold. QIntent keeps the operation declarative: criteria are visible, while QDSV internal representation stays inside the private runtime.
-
-## Semantic Score Operation
-
-`using_semantic_score(...)` is the advanced public-preview scoring operation for prepared signals. It is useful when a workflow needs to rank candidates using evidence, influence, priority and a prepared risk adjustment without exposing the internal QDSV scoring formula.
-
-Users declare:
-
-- `signal(...)`: a prepared comparable value in the input rows.
-- `influence`: how strongly that signal contributes to the evaluation.
-- `priority`: an operational priority modifier for that signal.
-- `risk_adjustment`: an optional prepared field or constant used by QDSV as a controlled risk adjustment.
+Flat model:
 
 ```python
-from qintent import QIntentClient
-
-client = QIntentClient()
-
-rows = [
-    {
-        "candidate_index": 0,
-        "data_quality": 920,
-        "business_fit": 860,
-        "delivery_confidence": 810,
-        "process_safety": 830,
-        "implementation_readiness": 850,
-        "execution_risk": 80,
-    },
-    {
-        "candidate_index": 1,
-        "data_quality": 910,
-        "business_fit": 700,
-        "delivery_confidence": 840,
-        "process_safety": 730,
-        "implementation_readiness": 720,
-        "execution_risk": 220,
-    },
-]
-
 source = """
 find_rows("candidate_index")
-  .using_semantic_score([
-      signal("data_quality", influence=30, priority=2),
-      signal("business_fit", influence=30, priority=3),
-      signal("delivery_confidence", influence=20, priority=1),
-      signal("process_safety", influence=10, priority=2),
-      signal("implementation_readiness", influence=10, priority=3),
-  ], risk_adjustment="execution_risk")
-  .accept_if(threshold=780)
-  .rank()
-  .top_k(5)
-"""
-
-passport = client.explain(source, rows=rows)
-result = client.run(source, rows=rows)
-
-print(passport["semantic_execution_passport"]["predicate"]["internal_formula_exposed"])
-print(result["result"]["selected_rows"])
-```
-
-This operation is intended for controlled evidence-ranking workflows, including classical triage, candidate prioritization, benchmarking, and reviewable decision support. The public API exposes the declared signals and evidence outputs, not the private QDSV scoring formula.
-
-## Structured Semantic Score Operation
-
-`using_structured_semantic_score(...)` is the advanced public-preview operation for hierarchical prepared-signal workflows. It is useful when candidates should be evaluated through blocks such as data quality, business value, delivery confidence, operational safety, and global risk.
-
-The public syntax exposes operational structure, not the private QDSV hierarchical or nonlinear scoring representation.
-
-```python
-from qintent import QIntentClient
-
-client = QIntentClient()
-
-rows = [
-    {
-        "candidate_index": 0,
-        "data_completeness": 930,
-        "data_consistency": 900,
-        "business_value": 820,
-        "implementation_readiness": 830,
-        "delivery_confidence": 850,
-        "operational_safety": 820,
-        "data_risk": 50,
-        "execution_risk": 120,
-        "data_quality_adjustment": -10,
-    }
-]
-
-source = """
-find_rows("candidate_index")
-  .using_structured_semantic_score([
-      block("data_quality", [
-          signal("data_completeness", influence=30, priority=2),
-          signal("data_consistency", influence=20, priority=1),
-      ], influence=30, priority=2, risk_adjustment="data_risk", adjustments=[
-          adjustment("data_quality_adjustment", influence=5),
+  .using_score_model([
+      score_term("quality", importance=30, priority=2, adjustments=[
+          score_adjustment("context", coefficient=0.10),
       ]),
-      block("business_value", [
-          signal("business_value", influence=40, priority=3),
-          signal("implementation_readiness", influence=20, priority=2),
-      ], influence=40, priority=3, risk_adjustment="execution_risk"),
-      block("delivery", [
-          signal("delivery_confidence", influence=25, priority=1),
-          signal("operational_safety", influence=15, priority=2),
-      ], influence=30, priority=1),
-  ], global_risk="execution_risk", profile="business_case_review")
-  .accept_if(threshold=600)
-  .rank()
-  .top_k(5)
+      score_term("benefit", importance=40, priority=3),
+      score_term("risk_fit", importance=30, priority=2),
+  ], penalty=0.05)
+  .accept_if(threshold=780, decision="gte")
 """
-
-passport = client.explain(source, rows=rows)
 result = client.run(source, rows=rows)
-
-print(passport["semantic_execution_passport"]["predicate"]["internal_formula_exposed"])
-print(result["result"]["selected_rows"])
 ```
 
-This operation is intended for structured evidence-ranking workflows where QDSV ranks candidates with block-level evidence, local/global risk and an auditable decision trace. Research-specific experiments and unpublished validation artifacts are intentionally kept outside the public SDK repository.
+Hierarchical model:
+
+```python
+source = """
+find_rows("candidate_index")
+  .using_hierarchical_score_model([
+      score_block("value", [
+          score_term("quality", importance=30, priority=2),
+          score_term("benefit", importance=40, priority=3),
+      ], importance=60, priority=2, penalty=0.02),
+      score_block("risk", [
+          score_term("risk_fit", importance=30, priority=3),
+      ], importance=40, priority=3, penalty=0.05),
+  ], penalty=0.03)
+  .accept_if(threshold=780, decision="gte")
+"""
+result = client.run(source, rows=rows)
+```
+
+Both forms compile through the same QDSV Operation Compiler v2 route. They support bounded contextual adjustments, term/block/global penalties, normalization, threshold decisions and exact fixed-point contracts. QIntent does not calculate winning candidates before quantum materialization. Ranking and presentation remain workflow-level concerns and are not part of the ScoreModel formula.
 
 ## Semantic Similarity
 
@@ -328,7 +231,16 @@ client.run(source, backend="aer")   # when supported by the deployment
 
 - `quest`: default QDSV statevector route. It can inspect and execute semantic state-space intent without requiring user-written circuits.
 - `aer`: circuit/simulator materialization when the deployment supports it.
-- IBM/hardware routes are not part of the default public SDK preview. They are available through Qruba/full platform configurations when enabled.
+- IBM execution is available only on licensed deployments with a saved user token. The SDK always performs canonical compilation preflight before submission.
+
+```python
+client = QIntentClient(license_key="your_qdsv_license")
+preflight = client.compile_hardware(source, rows=rows)
+job = client.submit_hardware(source, rows=rows, backend_name="least_busy", shots=1024)
+status = client.hardware_job(job["job_id"])
+```
+
+The SDK refuses submission when the operation program is not circuit-ready or reports a precomputed answer. Credentials, provider availability, queue time, shots and hardware cost remain the user's responsibility.
 
 ## Public API And Access
 
@@ -371,10 +283,13 @@ If the private node is unavailable, it may be offline, reserved for private proc
 
 ```bash
 qintent spec
+qintent capabilities
 qintent examples
 qintent compile 'x = domain(0, 15); find(x).where(x in [3, 6, 9])'
 qintent explain 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv
 qintent run 'find_rows("candidate_index").where("score", ">=", 850)' --rows candidates.csv
+qintent submit-hardware score_model.qi --rows candidates.csv --license-key YOUR_LICENSE --backend-name least_busy
+qintent hardware-job JOB_ID --license-key YOUR_LICENSE
 ```
 
 ## Examples And Notebooks

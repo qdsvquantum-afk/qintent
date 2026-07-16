@@ -121,6 +121,28 @@ def test_get_request_does_not_send_empty_json_body(monkeypatch: pytest.MonkeyPat
     assert "json" not in calls["kwargs"]
 
 
+def test_capabilities_uses_public_contract(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = {}
+
+    class FakeResponse:
+        ok = True
+        status_code = 200
+
+        @staticmethod
+        def json():
+            return {"status": "SUCCESS", "canonical_operation_count": 43}
+
+    def fake_request(method, url, **kwargs):
+        calls.update({"method": method, "url": url})
+        return FakeResponse()
+
+    monkeypatch.setattr("qintent.client.requests.request", fake_request)
+    result = QIntentClient().capabilities()
+    assert result["canonical_operation_count"] == 43
+    assert calls["method"] == "GET"
+    assert calls["url"].endswith("/qintent/capabilities")
+
+
 def test_private_node_transport_error_is_user_friendly(monkeypatch: pytest.MonkeyPatch) -> None:
     def fake_request(method, url, **kwargs):
         raise requests.ConnectionError("connection refused")
@@ -166,3 +188,99 @@ def test_private_node_http_error_is_not_hidden(monkeypatch: pytest.MonkeyPatch) 
 
     assert exc.value.status_code == 429
     assert exc.value.payload["detail"]["error_code"] == "E_RATE_LIMIT"
+
+
+def test_hardware_submission_requires_canonical_preflight(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = []
+
+    class FakeResponse:
+        ok = True
+        status_code = 200
+
+        def __init__(self, payload):
+            self.payload = payload
+
+        def json(self):
+            return self.payload
+
+    def fake_request(method, url, **kwargs):
+        calls.append((method, url, kwargs))
+        if url.endswith("/product/qpython/compile"):
+            return FakeResponse({
+                "status": "ACCEPTED",
+                "operation_program": {
+                    "circuit_ready": True,
+                    "answer_precomputed": False,
+                    "quantum_program_ready": True,
+                },
+            })
+        return FakeResponse({"job_id": "hwjob:test", "status": "queued", "job": {}})
+
+    monkeypatch.setattr("qintent.client.requests.request", fake_request)
+    client = QIntentClient(license_key="license-test")
+    result = client.submit_hardware(
+        "x = domain(0, 3); find(x).where(eq(x, 2))",
+        backend_name="least_busy",
+        shots=128,
+    )
+
+    assert result["job_id"] == "hwjob:test"
+    assert [call[1].rsplit("/api", 1)[-1] for call in calls] == [
+        "/product/qpython/compile",
+        "/product/qpython/quantum/sample",
+    ]
+    submitted = calls[1][2]["json"]
+    assert submitted["target"] == "quantum_hardware"
+    assert submitted["auth"]["license_key"] == "license-test"
+    assert submitted["shots"] == 128
+
+
+def test_hardware_submission_stops_when_circuit_is_not_ready(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = []
+
+    class FakeResponse:
+        ok = True
+        status_code = 200
+
+        @staticmethod
+        def json():
+            return {
+                "status": "ACCEPTED",
+                "operation_program": {
+                    "circuit_ready": False,
+                    "answer_precomputed": False,
+                    "missing_capabilities": ["lowering:test"],
+                },
+            }
+
+    def fake_request(method, url, **kwargs):
+        calls.append(url)
+        return FakeResponse()
+
+    monkeypatch.setattr("qintent.client.requests.request", fake_request)
+    with pytest.raises(QIntentAPIError, match="not circuit-ready"):
+        QIntentClient(license_key="license-test").submit_hardware(
+            "x = domain(0, 3); find(x).where(eq(x, 2))"
+        )
+    assert len(calls) == 1
+
+
+def test_hardware_job_encodes_identifier(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = {}
+
+    class FakeResponse:
+        ok = True
+        status_code = 200
+
+        @staticmethod
+        def json():
+            return {"job_id": "hwjob:test/value", "status": "queued", "job": {}}
+
+    def fake_request(method, url, **kwargs):
+        calls.update({"method": method, "url": url})
+        return FakeResponse()
+
+    monkeypatch.setattr("qintent.client.requests.request", fake_request)
+    QIntentClient().hardware_job("hwjob:test/value")
+    assert calls["method"] == "GET"
+    assert calls["url"].endswith("/product/hardware/jobs/hwjob%3Atest%2Fvalue?live_poll=true")

@@ -33,13 +33,20 @@ def build_parser() -> argparse.ArgumentParser:
         prog="qintent",
         description="Run QIntent source through a QDSV API.",
     )
-    parser.add_argument("command", choices=["spec", "examples", "validate", "compile", "explain", "run"])
+    parser.add_argument(
+        "command",
+        choices=[
+            "spec", "capabilities", "examples", "validate", "compile", "explain", "run",
+            "submit-hardware", "hardware-job", "cancel-hardware",
+        ],
+    )
     parser.add_argument("source", nargs="?", help="QIntent source string or path to a .qi file")
     parser.add_argument("--api-url", default=None, help="Base API URL, for example https://api.qdsv.cloud/api")
     parser.add_argument("--api-key", default=None, help="Optional API bearer token")
     parser.add_argument("--license-key", default=None, help="Optional QDSV/Qruba license key")
     parser.add_argument("--rows", default=None, help="CSV or JSON file with rows for find_rows/field queries")
     parser.add_argument("--backend", default="quest", help="Execution backend. Public preview default: quest")
+    parser.add_argument("--backend-name", default="least_busy", help="IBM backend name for submit-hardware")
     parser.add_argument("--backend-mode", default=None)
     parser.add_argument("--shots", type=int, default=256)
     return parser
@@ -53,8 +60,27 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "spec":
             result = client.spec()
+        elif args.command == "capabilities":
+            result = client.capabilities()
         elif args.command == "examples":
             result = {"examples": client.examples()}
+        elif args.command == "hardware-job":
+            if not args.source:
+                parser.error("hardware-job requires a job id")
+            result = client.hardware_job(args.source)
+        elif args.command == "cancel-hardware":
+            if not args.source:
+                parser.error("cancel-hardware requires a job id")
+            result = client.cancel_hardware_job(args.source)
+        elif args.command == "submit-hardware":
+            if not args.source:
+                parser.error("submit-hardware requires source")
+            result = client.submit_hardware(
+                _read_source(args.source),
+                rows=_load_rows(args.rows),
+                backend_name=args.backend_name,
+                shots=args.shots,
+            )
         else:
             if not args.source:
                 parser.error(f"{args.command} requires source")
