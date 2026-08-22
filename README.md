@@ -107,10 +107,34 @@ client.explain(source, rows=None, backend="quest")
 client.run(source, rows=None, backend="quest")
 client.compile_hardware(source, rows=None)
 client.submit_hardware(source, rows=None, backend_name="least_busy")
+client.submit_adaptive_hardware(source, rows=None, backend_name="least_busy")
 client.hardware_job(job_id)
 ```
 
 `compile()` responses include a safe `operation_program` passport with compiler version, digest, required capabilities, resource status and verification status. Private lowering operands and formulas are not exposed.
+
+Advanced families are classified explicitly instead of falling back silently:
+
+| State | Meaning |
+|---|---|
+| `compiler_v2_ready` | A canonical OperationProgram v2 and compatible realizer are available. |
+| `compile_only` | The intent is valid and inspectable, but execution is not registered yet. |
+| `specialized_runtime` | A domain-specific runtime is governed by an OperationProgram v2 envelope with strategy, realizer and digests. |
+| `not_materialized` | No compatible realization exists for the requested backend. |
+
+`execute()` is fail-closed: only `compiler_v2_ready` and verified `specialized_runtime` families may run. Compilation never implies execution, and QDSV does not substitute a classical answer when a quantum realization is missing.
+
+These states are governed by `qdsv_semantic_execution_contract.v1`. The
+contract keeps three observable layers separate: the semantic result, backend
+evidence, and the reported result with its source policy. It exposes contract
+identities and digests, not private formulas or lowering rules.
+
+`submit_adaptive_hardware()` requests the shared QDSV Runtime policy for
+independent-per-record predicates. The server, not the SDK, proves
+composability, compares deterministic partition sizes using ideal equivalence
+and physical metrics, freezes the winner, and submits one IBM Sampler job with
+multiple PUBs. Results are reported as `partitioned_compositional`; they
+preserve per-record decisions and never claim global coherent execution.
 
 ## Supported Preview Patterns
 
@@ -321,7 +345,7 @@ Traditional quantum frameworks often ask users to translate the problem into an 
 
 The public preview intentionally exposes a stable subset.
 
-Advanced QDSV families such as crypto, sensing, AI semantic operations, hardware routing, large-data execution and mitigation internals may compile or run only through Qruba full platform endpoints depending on license.
+Advanced QDSV families report their materialization state explicitly. Physical-property operations can use registered specialized runtimes without being forced through an unsuitable generic predicate implementation. Crypto remains compile-only in the public QIntent route. AI semantic operations are compile-only until their rows are bound; with bound rows they can become `compiler_v2_ready` through the same verified OperationProgram v2 path. Hardware routing, large-data execution and mitigation internals may require Qruba full-platform endpoints depending on license.
 
 Public endpoints may enforce row limits, payload limits, backend limits and execution time limits to protect shared free/preview infrastructure. For larger datasets, sensitive data or heavier workloads, use Qruba Cloud with an appropriate license or a private Docker/local QDSV node.
 

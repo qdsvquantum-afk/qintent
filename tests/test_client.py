@@ -284,3 +284,54 @@ def test_hardware_job_encodes_identifier(monkeypatch: pytest.MonkeyPatch) -> Non
     QIntentClient().hardware_job("hwjob:test/value")
     assert calls["method"] == "GET"
     assert calls["url"].endswith("/product/hardware/jobs/hwjob%3Atest%2Fvalue?live_poll=true")
+
+
+def test_adaptive_hardware_submission_uses_shared_server_policy(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = []
+
+    class FakeResponse:
+        ok = True
+        status_code = 200
+
+        def __init__(self, payload):
+            self.payload = payload
+
+        def json(self):
+            return self.payload
+
+    def fake_request(method, url, **kwargs):
+        calls.append((method, url, kwargs))
+        if url.endswith("/product/qpython/compile"):
+            return FakeResponse(
+                {
+                    "status": "ACCEPTED",
+                    "operation_program": {
+                        "circuit_ready": True,
+                        "answer_precomputed": False,
+                        "quantum_program_ready": True,
+                    },
+                }
+            )
+        return FakeResponse({"job_id": "hwjob:adaptive", "status": "queued", "job": {}})
+
+    monkeypatch.setattr("qintent.client.requests.request", fake_request)
+    original_context = {"origin_product": "sdk-test"}
+    result = QIntentClient(license_key="license-test").submit_adaptive_hardware(
+        "x = domain(0, 3); find(x).where(eq(x, 2))",
+        rows=[{"candidate_index": 0}],
+        backend_name="ibm_marrakesh",
+        shots=512,
+        request_context=original_context,
+    )
+
+    assert result["job_id"] == "hwjob:adaptive"
+    assert original_context == {"origin_product": "sdk-test"}
+    submitted = calls[1][2]["json"]
+    assert submitted["mode"] == "superposition_oracle"
+    assert submitted["request_context"] == {
+        "origin_product": "sdk-test",
+        "adaptive_partitioning_required": True,
+    }
+    assert "selected_partition_size" not in submitted["request_context"]

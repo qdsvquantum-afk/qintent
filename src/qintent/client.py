@@ -184,6 +184,7 @@ class QIntentClient:
         shots: int = 1024,
         mode: str = "amplified_oracle",
         optimization_level: int = 1,
+        request_context: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Preflight and submit the same canonical QIntent program to IBM."""
 
@@ -200,9 +201,42 @@ class QIntentClient:
                 "optimization_level": optimization_level,
             }
         )
+        if request_context:
+            payload["request_context"] = dict(request_context)
         if instance:
             payload["instance"] = instance
         return self._request("POST", "/product/qpython/quantum/sample", json=payload)
+
+    def submit_adaptive_hardware(
+        self,
+        source: str,
+        *,
+        rows: Sequence[Mapping[str, Any]] | None = None,
+        backend_name: str = "least_busy",
+        instance: str | None = None,
+        shots: int = 1024,
+        optimization_level: int = 1,
+        request_context: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Submit through the shared adaptive Runtime without local planning.
+
+        This path requires a composable per-record problem and deliberately
+        uses ``superposition_oracle``. The server remains the sole authority
+        for applicability, target materialization, selection, and freezing.
+        """
+
+        context = dict(request_context or {})
+        context["adaptive_partitioning_required"] = True
+        return self.submit_hardware(
+            source,
+            rows=rows,
+            backend_name=backend_name,
+            instance=instance,
+            shots=shots,
+            mode="superposition_oracle",
+            optimization_level=optimization_level,
+            request_context=context,
+        )
 
     def hardware_job(self, job_id: str, *, live_poll: bool = True) -> dict[str, Any]:
         """Return the current state and public evidence for a submitted job."""
