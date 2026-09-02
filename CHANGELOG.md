@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 - 2026-09-02
+
+- Updates the public canonical capability catalog to 45 operations.
+- Documents ``select_if(predicate, value_if_true, value_if_false)`` as the
+  bounded conditional selection helper shared with QDSV Operation Compiler v2.
+
 ## 0.2.0 - 2026-07-16
 
 - Publish the exact 43-operation QDSV canonical capability catalog.

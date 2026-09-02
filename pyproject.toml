@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling>=1.25"]
+requires = ["hatchling>=1.25,<1.29"]
 build-backend = "hatchling.build"
 
 [project]
 name = "qdsv-qintent"
-version = "0.2.0"
+version = "0.2.1"
 description = "Lightweight Python client for QIntent, the QDSV-native semantic quantum-intent language."
 readme = "README.md"
 requires-python = ">=3.9"

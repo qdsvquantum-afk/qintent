@@ -56,13 +56,13 @@ A score term may be a prepared similarity or any bounded numeric value/expressio
 
 ## Canonical operations
 
-The public contract contains 43 operation identities:
+The public contract contains 45 operation identities:
 
 ```text
-abs, abs_diff, add, and, between, ceil, clip, coalesce,
+abs, abs_diff, add, and, between, bounded_lookup, ceil, clip, coalesce,
 default_if_invalid, div, eq, field, floor, gt, gte, in_set,
 is_null, lt, lte, max, mean_fields, min, mod, mul, ne, not,
-not_null, or, outside, percent, ratio, round, safe_div, sign,
+not_null, or, outside, percent, ratio, round, safe_div, select_if, sign,
 similarity, squared_diff, sub, sum_fields, vector,
 vector_similarity, weighted_sum, within_tolerance, xor
 ```

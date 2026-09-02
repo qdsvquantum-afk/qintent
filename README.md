@@ -156,14 +156,15 @@ preserve per-record decisions and never claim global coherent execution.
 - `safe_div(...)`, `ratio(...)`, `percent(...)`
 - `is_null(...)`, `not_null(...)`, `coalesce(...)`, `default_if_invalid(...)`
 - `sum_fields([...])`, `mean_fields([...])`, `weighted_sum([...], [...])`
+- `bounded_lookup(value, keys, values)` and `select_if(predicate, value_if_true, value_if_false)`
 
-The capability contract reports exactly 43 canonical operations:
+The capability contract reports exactly 45 canonical operations:
 
 ```text
-abs, abs_diff, add, and, between, ceil, clip, coalesce,
+abs, abs_diff, add, and, between, bounded_lookup, ceil, clip, coalesce,
 default_if_invalid, div, eq, field, floor, gt, gte, in_set,
 is_null, lt, lte, max, mean_fields, min, mod, mul, ne, not,
-not_null, or, outside, percent, ratio, round, safe_div, sign,
+not_null, or, outside, percent, ratio, round, safe_div, select_if, sign,
 similarity, squared_diff, sub, sum_fields, vector,
 vector_similarity, weighted_sum, within_tolerance, xor
 ```

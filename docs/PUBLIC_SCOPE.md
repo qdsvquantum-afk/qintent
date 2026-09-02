@@ -5,7 +5,8 @@ This repository contains the MIT-licensed QIntent Developer Preview SDK, CLI, ex
 ## Included
 
 - Validation, compilation, explanation and execution through QDSV APIs.
-- A public capability contract for all 43 canonical operations.
+- A public capability contract for all 45 canonical operations, including
+  bounded conditional selection through ``select_if``.
 - Flat and hierarchical ScoreModel v2 declarations.
 - Canonical hardware preflight and licensed IBM job submission/status helpers.
 - Public evidence and stable operation-program summaries.
