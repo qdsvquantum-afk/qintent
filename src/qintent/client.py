@@ -12,7 +12,7 @@ from .exceptions import QIntentAPIError, QIntentHTTPError
 
 
 DEFAULT_API_URL = "https://api.qdsv.cloud/api"
-SDK_VERSION = "0.2.1"
+SDK_VERSION = "0.2.2"
 PRIVATE_NODE_UNAVAILABLE_MESSAGE = (
     "Private QDSV node temporarily unavailable. It may be offline, reserved for "
     "private processing, or busy. Try again later or use QIntentClient() for "

@@ -56,11 +56,11 @@ A score term may be a prepared similarity or any bounded numeric value/expressio
 
 ## Canonical operations
 
-The public contract contains 45 operation identities:
+The public contract contains 46 operation identities:
 
 ```text
 abs, abs_diff, add, and, between, bounded_lookup, ceil, clip, coalesce,
-default_if_invalid, div, eq, field, floor, gt, gte, in_set,
+default_if_invalid, div, divmod, eq, field, floor, gt, gte, in_set,
 is_null, lt, lte, max, mean_fields, min, mod, mul, ne, not,
 not_null, or, outside, percent, ratio, round, safe_div, select_if, sign,
 similarity, squared_diff, sub, sum_fields, vector,
@@ -68,6 +68,10 @@ vector_similarity, weighted_sum, within_tolerance, xor
 ```
 
 Use `and_(...)`, `or_(...)` and `not_(...)` when a Python reserved word cannot be used as a function name. Operator syntax such as `+`, `-`, `*`, `/`, `%`, comparisons, `and`, `or` and `not` is also normalized into these operation identities.
+
+`divmod(value, divisor)` is a bounded multi-output helper. It returns a
+quotient/remainder pair that can be compared as a two-element literal vector,
+for example `eq(divmod(x, 3), [2, 1])`.
 
 ## Field access
 

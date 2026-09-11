@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2 - 2026-09-11
+
+- Exposes ``divmod(value, divisor)`` in the public canonical QIntent operation
+  catalog as the bounded quotient/remainder multi-output helper.
+- Documents quotient/remainder pair comparison through canonical QDSV
+  predicates, for example ``eq(divmod(x, 3), [2, 1])``.
+
 ## 0.2.1 - 2026-09-02
 
 - Updates the public canonical capability catalog to 45 operations.

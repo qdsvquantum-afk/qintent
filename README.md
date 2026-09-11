@@ -153,20 +153,32 @@ preserve per-record decisions and never claim global coherent execution.
 - `between(...)`, `outside(...)`, `abs_diff(...)`, `squared_diff(...)`, `within_tolerance(...)`
 - `similarity(...)`, `within_similarity(...)`
 - `vector_similarity(...)`
-- `safe_div(...)`, `ratio(...)`, `percent(...)`
+- `safe_div(...)`, `divmod(...)`, `ratio(...)`, `percent(...)`
 - `is_null(...)`, `not_null(...)`, `coalesce(...)`, `default_if_invalid(...)`
 - `sum_fields([...])`, `mean_fields([...])`, `weighted_sum([...], [...])`
 - `bounded_lookup(value, keys, values)` and `select_if(predicate, value_if_true, value_if_false)`
 
-The capability contract reports exactly 45 canonical operations:
+The capability contract reports exactly 46 canonical operations:
 
 ```text
 abs, abs_diff, add, and, between, bounded_lookup, ceil, clip, coalesce,
-default_if_invalid, div, eq, field, floor, gt, gte, in_set,
+default_if_invalid, div, divmod, eq, field, floor, gt, gte, in_set,
 is_null, lt, lte, max, mean_fields, min, mod, mul, ne, not,
 not_null, or, outside, percent, ratio, round, safe_div, select_if, sign,
 similarity, squared_diff, sub, sum_fields, vector,
 vector_similarity, weighted_sum, within_tolerance, xor
+```
+
+`divmod(value, divisor)` returns a bounded quotient/remainder pair. It is useful
+when a QDSV predicate needs to validate both the bucket and the residue under
+one canonical multi-output operation:
+
+```python
+source = """
+x = domain(0, 15)
+find(x).where(eq(divmod(x, 3), [2, 1]))
+"""
+result = client.run(source)
 ```
 
 See [grammar/QINTENT_PREVIEW.md](grammar/QINTENT_PREVIEW.md) for public preview grammar notes.

@@ -87,6 +87,7 @@ def test_api_key_is_sent_as_header_and_bearer(monkeypatch: pytest.MonkeyPatch) -
     headers = calls["kwargs"]["headers"]
     assert headers["x-api-key"] == "qdsvi_demo_key"
     assert headers["Authorization"] == "Bearer qdsvi_demo_key"
+    assert headers["x-sdk-version"] == "0.2.2"
 
 
 def test_import_surface() -> None:
@@ -130,7 +131,7 @@ def test_capabilities_uses_public_contract(monkeypatch: pytest.MonkeyPatch) -> N
 
         @staticmethod
         def json():
-            return {"status": "SUCCESS", "canonical_operation_count": 43}
+            return {"status": "SUCCESS", "canonical_operation_count": 46}
 
     def fake_request(method, url, **kwargs):
         calls.update({"method": method, "url": url})
@@ -138,7 +139,7 @@ def test_capabilities_uses_public_contract(monkeypatch: pytest.MonkeyPatch) -> N
 
     monkeypatch.setattr("qintent.client.requests.request", fake_request)
     result = QIntentClient().capabilities()
-    assert result["canonical_operation_count"] == 43
+    assert result["canonical_operation_count"] == 46
     assert calls["method"] == "GET"
     assert calls["url"].endswith("/qintent/capabilities")
 
