@@ -45,7 +45,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--api-key", default=None, help="Optional API bearer token")
     parser.add_argument("--license-key", default=None, help="Optional QDSV/Qruba license key")
     parser.add_argument("--rows", default=None, help="CSV or JSON file with rows for find_rows/field queries")
-    parser.add_argument("--backend", default="quest", help="Execution backend. Public preview default: quest")
+    parser.add_argument("--backend", default="quest", help="Execution backend. Public default: quest")
     parser.add_argument("--backend-name", default="least_busy", help="IBM backend name for submit-hardware")
     parser.add_argument("--backend-mode", default=None)
     parser.add_argument("--shots", type=int, default=256)

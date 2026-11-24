@@ -1,9 +1,9 @@
-# QIntent Developer Preview
+# QIntent
 
 [![PyPI](https://img.shields.io/pypi/v/qdsv-qintent.svg)](https://pypi.org/project/qdsv-qintent/)
 [![Python](https://img.shields.io/pypi/pyversions/qdsv-qintent.svg)](https://pypi.org/project/qdsv-qintent/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-developer%20preview-0ea5e9.svg)](#public-preview-limits)
+[![Status](https://img.shields.io/badge/status-public%20product-148f77.svg)](#public-service-limits)
 
 Documentation site: https://qdsvquantum-afk.github.io/qintent/
 
@@ -83,8 +83,8 @@ This route keeps QIntent positioned as the problem-intent language and uses QDSV
 ## What This Is
 
 - A lightweight Python client SDK for QIntent.
-- A public preview grammar and examples for QDSV-native intent expression.
-- A way to validate, compile, explain and run small public-preview examples through QDSV APIs.
+- A public grammar and examples for QDSV-native intent expression.
+- A way to validate, compile, explain and run supported workloads through QDSV APIs.
 - A developer entry point into Qruba/QDSV.
 
 ## What This Is Not
@@ -93,9 +93,12 @@ This route keeps QIntent positioned as the problem-intent language and uses QDSV
 - It is not an unrestricted Python execution environment.
 - It is not a local QuEST/Aer/IBM installation.
 - It does not expose CAP, backend selection internals, lowering, noise mitigation internals, crypto internals, private endpoints or credentials.
-- It is not intended for large private datasets on the public free preview API.
+- It is not intended for sensitive data or unbounded workloads on a shared public service.
 
 ## Core Methods
+
+Hardware optimization profiles for QIntent and Qruba are documented in
+[docs/optimization_profiles.md](docs/optimization_profiles.md).
 
 ```python
 client.spec()
@@ -106,9 +109,9 @@ client.compile(source, rows=None, backend="quest")
 client.explain(source, rows=None, backend="quest")
 client.run(source, rows=None, backend="quest")
 client.compile_hardware(source, rows=None)
-client.submit_hardware(source, rows=None, backend_name="least_busy")
+client.submit_hardware(source, rows=None, backend_name="least_busy", optimization_profile="baseline")
 client.submit_adaptive_hardware(source, rows=None, backend_name="least_busy")
-client.hardware_job(job_id)
+client.hardware_job(job_id, live_poll=False)
 ```
 
 `compile()` responses include a safe `operation_program` passport with compiler version, digest, required capabilities, resource status and verification status. Private lowering operands and formulas are not exposed.
@@ -136,7 +139,7 @@ and physical metrics, freezes the winner, and submits one IBM Sampler job with
 multiple PUBs. Results are reported as `partitioned_compositional`; they
 preserve per-record decisions and never claim global coherent execution.
 
-## Supported Preview Patterns
+## Supported Patterns
 
 - `find_rows(...).where(...)`
 - `find_rows(...).where_between(...)`
@@ -181,7 +184,7 @@ find(x).where(eq(divmod(x, 3), [2, 1]))
 result = client.run(source)
 ```
 
-See [grammar/QINTENT_PREVIEW.md](grammar/QINTENT_PREVIEW.md) for public preview grammar notes.
+See [grammar/QINTENT.md](grammar/QINTENT.md) for the public QIntent grammar.
 
 ## ScoreModel v2
 
@@ -273,15 +276,21 @@ client.run(source, backend="aer")   # when supported by the deployment
 ```python
 client = QIntentClient(license_key="your_qdsv_license")
 preflight = client.compile_hardware(source, rows=rows)
-job = client.submit_hardware(source, rows=rows, backend_name="least_busy", shots=1024)
-status = client.hardware_job(job["job_id"])
+job = client.submit_hardware(
+    source,
+    rows=rows,
+    backend_name="least_busy",
+    shots=1024,
+    optimization_profile="baseline",
+)
+status = client.hardware_job(job["job_id"], live_poll=False)
 ```
 
 The SDK refuses submission when the operation program is not circuit-ready or reports a precomputed answer. Credentials, provider availability, queue time, shots and hardware cost remain the user's responsibility.
 
 ## Public API And Access
 
-Public informational endpoints such as `spec()` and `examples()` can be opened without a key. Public-preview value calls such as `validate`, `compile`, `explain` and `run` are also available without a key when the deployment is configured for public demo mode:
+Public informational endpoints such as `spec()` and `examples()` can be opened without a key. Public value calls such as `validate`, `compile`, `explain` and `run` are also available without a key when the deployment is configured for public access:
 
 ```python
 client = QIntentClient()
@@ -305,7 +314,7 @@ Initial public SDK quota:
 
 - QIntent value requests: deployment-controlled, default 100/month per IP or optional API key bucket.
 - QIntent rows: deployment-controlled, default 200 rows/request.
-- Hardware execution: not available from public SDK preview.
+- Hardware execution: requires an authorized deployment, credentials and provider capacity.
 
 Private Docker/local execution is available only when a private QDSV node is online:
 
@@ -334,7 +343,7 @@ qintent hardware-job JOB_ID --license-key YOUR_LICENSE
 - [Quickstart](QUICKSTART.md)
 - [Examples](examples/)
 - [Notebooks](notebooks/)
-- [Public grammar](grammar/QINTENT_PREVIEW.md)
+- [Public grammar](grammar/QINTENT.md)
 - [Roadmap](ROADMAP.md)
 
 ## How QIntent Differs
@@ -354,26 +363,26 @@ Traditional quantum frameworks often ask users to translate the problem into an 
 | PennyLane | Framework for QML, differentiation and hybrid optimization. | QIntent is broader for semantic operations, predicates, relations, scoring, ranking, search and evidence. | Useful when users do not want to train a QML model, but represent and execute a semantic problem with evidence. |
 | Silq / Qrisp | Higher-level quantum programming languages. | QIntent tries to avoid programming when the problem can be expressed semantically. | Users declare the problem and QDSV decides how to execute it. |
 
-## Public Preview Limits
+## Public Service Limits
 
-The public preview intentionally exposes a stable subset.
+The public service exposes a stable, bounded subset of the QDSV capability catalog.
 
 Advanced QDSV families report their materialization state explicitly. Physical-property operations can use registered specialized runtimes without being forced through an unsuitable generic predicate implementation. Crypto remains compile-only in the public QIntent route. AI semantic operations are compile-only until their rows are bound; with bound rows they can become `compiler_v2_ready` through the same verified OperationProgram v2 path. Hardware routing, large-data execution and mitigation internals may require Qruba full-platform endpoints depending on license.
 
-Public endpoints may enforce row limits, payload limits, backend limits and execution time limits to protect shared free/preview infrastructure. For larger datasets, sensitive data or heavier workloads, use Qruba Cloud with an appropriate license or a private Docker/local QDSV node.
+Public endpoints may enforce row limits, payload limits, backend limits and execution time limits. For larger datasets, sensitive data or heavier workloads, use Qruba Cloud with an appropriate license or a private Docker/local QDSV node.
 
 ## Open SDK, Private Runtime
 
 This repository is intentionally open-core:
 
-- Open under MIT: Python SDK, CLI, examples, notebooks, public preview docs and public grammar notes.
+- Open under MIT: Python SDK, CLI, examples, notebooks, public documentation and public grammar notes.
 - Not included: QDSV Runtime, CAP, backend selector, lowering, QuEST/Aer/IBM adapters, optimization layers, noise mitigation internals, crypto internals, private endpoints, keys, secrets or production platform configuration.
 
 QDSV, QIntent and Qruba names and marks are project marks of their respective owners. The MIT License for this repository does not grant trademark rights.
 
 ## Live Access
 
-These web experiences are currently in Developer Preview. Interfaces, copy and visual design may evolve while QIntent and QDSV continue to stabilize.
+These web experiences provide public access to QIntent and QDSV capabilities. Interfaces, copy and visual design may evolve through normal product releases.
 
 - QDSV landing: https://qdsv.cloud
 - QIntent site: https://qintent.qdsv.cloud

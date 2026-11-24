@@ -15,7 +15,7 @@ What QIntent is
 ---------------
 
 * A Python SDK and declarative language for bounded QDSV-native intent.
-* A way to validate, compile, explain and run small public-preview examples.
+* A way to validate, compile, explain and run bounded public examples.
 * A developer entry point into QDSV and Qruba workflows.
 * A public surface for predicates, rankings, domains, prepared signals,
   decision declarations and semantic execution evidence.

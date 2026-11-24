@@ -1,6 +1,6 @@
 # QIntent Roadmap
 
-QIntent is in Developer Preview. The public SDK is intentionally small, bounded and client-only while QDSV Runtime remains private.
+QIntent is a public SDK with bounded, client-only access to the QDSV semantic runtime. The public capability catalog expands through versioned releases while the private runtime remains protected.
 
 ## Current
 
@@ -8,7 +8,7 @@ QIntent is in Developer Preview. The public SDK is intentionally small, bounded 
 - Public QIntent API client.
 - `validate`, `compile`, `explain` and `run`.
 - QIntent Explain with Semantic Execution Passport.
-- QuEST/statevector default route for public preview examples.
+- QuEST/statevector default route for public examples.
 - Controlled QDSV operations for predicates, matching, similarity, safe math, null handling and row-level aggregation.
 - Decision Model operation without exposing the internal QDSV formula.
 
@@ -17,8 +17,8 @@ QIntent is in Developer Preview. The public SDK is intentionally small, bounded 
 - More reproducible Colab notebooks.
 - Clearer example gallery by domain.
 - More public grammar examples.
-- Better error messages for invalid chains and unsupported preview syntax.
-- Lightweight TypeScript client preview.
+- Better error messages for invalid chains and unsupported syntax.
+- Lightweight TypeScript client.
 - Public examples that show semantic decision vs hardware evidence separation.
 
 ## Later

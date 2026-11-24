@@ -2,13 +2,13 @@
 
 Thanks for helping improve QIntent.
 
-This repository is a Developer Preview for the public Python SDK, examples, notebooks, grammar notes and documentation.
+This repository contains the public Python SDK, examples, notebooks, grammar notes and documentation.
 
 ## Good Contributions
 
 - Bug reports with minimal reproducible examples.
 - Documentation improvements.
-- New examples using the public preview grammar.
+- New examples using the public grammar.
 - Notebook improvements.
 - Clear reports of confusing error messages.
 - Suggestions for bounded, auditable semantic operations.
@@ -18,7 +18,7 @@ This repository is a Developer Preview for the public Python SDK, examples, note
 - Requests to expose QDSV Runtime internals.
 - Requests for private backend adapters or credentials.
 - Arbitrary Python execution.
-- Unbounded workloads or bulk private data processing through the public preview.
+- Unbounded workloads or bulk private data processing through the public service.
 
 ## Development
 

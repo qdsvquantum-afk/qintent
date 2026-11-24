@@ -73,3 +73,13 @@ Private Docker/local execution is available only when a private QDSV node is onl
 QIntent is a declarative intent language powered by QDSV. The SDK is a client only; it does not install QDSV Runtime locally.
 
 Public informational endpoints can be viewed without a key. Public demo deployments also allow value-producing calls such as `validate`, `compile`, `explain` and `run` without a key, using deployment-controlled IP or optional API-key quota buckets.
+## Hardware optimization profile
+
+Hardware submission accepts a per-job optimization profile:
+
+    job = client.submit_hardware(source, optimization_profile="baseline")
+    status = client.hardware_job(job["job_id"])
+
+Use balanced or advanced only for experiments that intentionally spend more
+worker time evaluating physical candidates. See
+docs/optimization_profiles.md.

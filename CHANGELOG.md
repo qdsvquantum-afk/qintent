@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0 - 2026-11-24
+
+- Promote the public QIntent contract to ``qintent_public.v1``.
+- Align public service metadata and documentation with the QIntent product
+  surface instead of a preview release channel.
+- Keep backend and execution limits explicit per capability and provider.
+
+## 0.2.3 - 2026-11-19
+
+- Add per-job hardware optimization profiles: baseline, balanced and advanced.
+- Make SDK hardware status reads storage-backed by default; live provider
+  polling is opt-in with live_poll=True.
+- Document the shared QIntent/Qruba hardware path and profile evidence.
+
 ## 0.2.2 - 2026-09-11
 
 - Exposes ``divmod(value, divisor)`` in the public canonical QIntent operation
@@ -23,4 +37,4 @@
 
 ## 0.1.0
 
-- Initial QIntent Developer Preview SDK, CLI, examples and documentation.
+- Initial public QIntent SDK, CLI, examples and documentation.

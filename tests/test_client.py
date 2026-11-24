@@ -87,7 +87,7 @@ def test_api_key_is_sent_as_header_and_bearer(monkeypatch: pytest.MonkeyPatch) -
     headers = calls["kwargs"]["headers"]
     assert headers["x-api-key"] == "qdsvi_demo_key"
     assert headers["Authorization"] == "Bearer qdsvi_demo_key"
-    assert headers["x-sdk-version"] == "0.2.2"
+    assert headers["x-sdk-version"] == "0.3.0"
 
 
 def test_import_surface() -> None:
@@ -234,6 +234,7 @@ def test_hardware_submission_requires_canonical_preflight(monkeypatch: pytest.Mo
     assert submitted["target"] == "quantum_hardware"
     assert submitted["auth"]["license_key"] == "license-test"
     assert submitted["shots"] == 128
+    assert submitted["optimization_profile"] == "baseline"
 
 
 def test_hardware_submission_stops_when_circuit_is_not_ready(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -284,7 +285,7 @@ def test_hardware_job_encodes_identifier(monkeypatch: pytest.MonkeyPatch) -> Non
     monkeypatch.setattr("qintent.client.requests.request", fake_request)
     QIntentClient().hardware_job("hwjob:test/value")
     assert calls["method"] == "GET"
-    assert calls["url"].endswith("/product/hardware/jobs/hwjob%3Atest%2Fvalue?live_poll=true")
+    assert calls["url"].endswith("/product/hardware/jobs/hwjob%3Atest%2Fvalue")
 
 
 def test_adaptive_hardware_submission_uses_shared_server_policy(

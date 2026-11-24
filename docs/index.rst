@@ -24,7 +24,7 @@ compilation, explanation, execution results, and semantic execution evidence.
       :link: quickstart
       :link-type: doc
 
-      Install ``qdsv-qintent`` and run small public-preview examples from
+      Install ``qdsv-qintent`` and run bounded public examples from
       Python.
 
    .. grid-item-card:: QIntent to Bridge to Qiskit
@@ -39,7 +39,7 @@ compilation, explanation, execution results, and semantic execution evidence.
       :link-type: doc
 
       Understand what is public, what is intentionally private, and where the
-      preview boundaries are.
+      public capability boundaries are.
 
 .. toctree::
    :maxdepth: 2

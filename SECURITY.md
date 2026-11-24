@@ -8,6 +8,6 @@ Please do not open a public issue for sensitive security concerns.
 
 Use the contact form at https://qdsv.cloud/ or contact the project maintainers privately.
 
-## Public Preview Boundaries
+## Public Service Boundaries
 
-The public preview is intended for small examples, notebooks and SDK evaluation. It should not be used for sensitive data, production workloads or large private datasets.
+The public service accepts bounded semantic requests and should not receive sensitive data, credentials, regulated information or unbounded private datasets. Larger workloads require an authorized Qruba or private QDSV deployment.

@@ -12,7 +12,8 @@ from .exceptions import QIntentAPIError, QIntentHTTPError
 
 
 DEFAULT_API_URL = "https://api.qdsv.cloud/api"
-SDK_VERSION = "0.2.2"
+SDK_VERSION = "0.3.0"
+OPTIMIZATION_PROFILES = ("baseline", "balanced", "advanced")
 PRIVATE_NODE_UNAVAILABLE_MESSAGE = (
     "Private QDSV node temporarily unavailable. It may be offline, reserved for "
     "private processing, or busy. Try again later or use QIntentClient() for "
@@ -184,12 +185,18 @@ class QIntentClient:
         shots: int = 1024,
         mode: str = "amplified_oracle",
         optimization_level: int = 1,
+        optimization_profile: str = "baseline",
         request_context: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Preflight and submit the same canonical QIntent program to IBM."""
 
         if not self.license_key:
             raise QIntentAPIError("QDSV_LICENSE_KEY is required for IBM hardware submission")
+        profile = str(optimization_profile or "baseline").strip().lower()
+        if profile not in OPTIMIZATION_PROFILES:
+            raise QIntentAPIError(
+                "optimization_profile must be one of: baseline, balanced, advanced"
+            )
         preflight = self.compile_hardware(source, rows=rows)
         self._assert_hardware_ready(preflight)
         payload = self._hardware_payload(source, rows=rows)
@@ -199,6 +206,7 @@ class QIntentClient:
                 "shots": shots,
                 "mode": mode,
                 "optimization_level": optimization_level,
+                "optimization_profile": profile,
             }
         )
         if request_context:
@@ -216,6 +224,7 @@ class QIntentClient:
         instance: str | None = None,
         shots: int = 1024,
         optimization_level: int = 1,
+        optimization_profile: str = "baseline",
         request_context: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Submit through the shared adaptive Runtime without local planning.
@@ -235,10 +244,11 @@ class QIntentClient:
             shots=shots,
             mode="superposition_oracle",
             optimization_level=optimization_level,
+            optimization_profile=optimization_profile,
             request_context=context,
         )
 
-    def hardware_job(self, job_id: str, *, live_poll: bool = True) -> dict[str, Any]:
+    def hardware_job(self, job_id: str, *, live_poll: bool = False) -> dict[str, Any]:
         """Return the current state and public evidence for a submitted job."""
 
         suffix = "?live_poll=true" if live_poll else ""

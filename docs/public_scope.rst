@@ -6,7 +6,7 @@ The public QIntent repository includes:
 * Python SDK package ``qdsv-qintent``.
 * CLI command ``qintent``.
 * Public examples and notebooks.
-* Public preview grammar notes.
+* Public QIntent grammar notes.
 * Documentation for using QIntent through the QDSV public API.
 * QIntent Explain and Semantic Execution Passport outputs.
 * Controlled helper operations for prepared values and small examples.
@@ -32,5 +32,5 @@ QIntent is the public language and SDK layer. QDSV is the underlying semantic
 computation model and runtime. Qruba is the visual platform built on top of
 QDSV.
 
-The public preview exposes a bounded subset first. That should not be read as
+The public service exposes a bounded subset first. That should not be read as
 the ceiling of QDSV.

@@ -1,8 +1,8 @@
 project = "QIntent"
 author = "QDSV / Qruba"
 copyright = "2026, QDSV / Qruba"
-version = "0.2"
-release = "0.2.2"
+version = "0.3"
+release = "0.3.0"
 
 extensions = [
     "sphinx.ext.autodoc",

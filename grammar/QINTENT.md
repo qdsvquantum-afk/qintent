@@ -1,4 +1,4 @@
-# QIntent Public Preview Grammar
+# QIntent Public Grammar
 
 QIntent is a declarative language for producing canonical QDSV problem intent. It does not execute arbitrary Python and does not own a separate compiler.
 

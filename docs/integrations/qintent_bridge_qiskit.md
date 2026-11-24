@@ -1,6 +1,6 @@
 # QIntent to QDSV Bridge to Qiskit
 
-Status: public developer-preview positioning note.
+Status: public product positioning note.
 
 This guide shows how QIntent can be described as an upstream intent layer for QDSV Bridge without submitting QIntent as a separate Qiskit Ecosystem project yet.
 

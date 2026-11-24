@@ -1,11 +1,11 @@
 # Public Scope
 
-This repository contains the MIT-licensed QIntent Developer Preview SDK, CLI, examples, notebooks, tests and public grammar.
+This repository contains the MIT-licensed QIntent SDK, CLI, examples, notebooks, tests and public grammar.
 
 ## Included
 
 - Validation, compilation, explanation and execution through QDSV APIs.
-- A public capability contract for all 45 canonical operations, including
+- A public capability contract for all 46 canonical operations, including
   bounded conditional selection through ``select_if``.
 - Flat and hierarchical ScoreModel v2 declarations.
 - Canonical hardware preflight and licensed IBM job submission/status helpers.
@@ -50,6 +50,6 @@ ScoreModel is a canonical operation composition inside ProblemSpec. The public t
 
 ## Availability and data
 
-Public APIs are intended for bounded examples and may enforce payload, row, execution and backend limits. IBM execution requires a licensed deployment, a user token saved by that deployment and provider capacity. Do not send sensitive data to a public preview endpoint.
+Public APIs are intended for bounded workloads and may enforce payload, row, execution and backend limits. IBM execution requires a licensed deployment, a user token saved by that deployment and provider capacity. Do not send sensitive data to a public endpoint.
 
 QDSV, QIntent and Qruba are project marks. The MIT license does not grant trademark rights.
