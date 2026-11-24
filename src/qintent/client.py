@@ -14,6 +14,7 @@ from .exceptions import QIntentAPIError, QIntentHTTPError
 DEFAULT_API_URL = "https://api.qdsv.cloud/api"
 SDK_VERSION = "0.3.0"
 OPTIMIZATION_PROFILES = ("baseline", "balanced", "advanced")
+SCE_EXPERIMENTAL_CONTRACT = "qdsv_bridge_composition_experimental.v1"
 PRIVATE_NODE_UNAVAILABLE_MESSAGE = (
     "Private QDSV node temporarily unavailable. It may be offline, reserved for "
     "private processing, or busy. Try again later or use QIntentClient() for "
@@ -125,6 +126,41 @@ class QIntentClient:
     def capabilities(self) -> dict[str, Any]:
         """Return the canonical operation and ScoreModel capability contract."""
         return self._request("GET", "/qintent/capabilities")
+
+    def composition_capabilities(self) -> dict[str, Any]:
+        """Return SCE capabilities and its experimental publication policy."""
+        return self._request("GET", "/product/composition/capabilities")
+
+    def generate_composition_candidate(
+        self,
+        *,
+        name: str,
+        expression: Mapping[str, Any],
+        domains: Sequence[Mapping[str, Any]] | None = None,
+        description: str | None = None,
+        source: str | None = None,
+        publication_target: str = "internal_candidate",
+        semantic_cross_check_max_cases: int | None = None,
+    ) -> dict[str, Any]:
+        """Generate a governed SCE candidate without changing public QIntent status.
+
+        SCE candidates remain experimental until the backend governance process
+        promotes them. The SDK only forwards the structured request.
+        """
+        payload: dict[str, Any] = {
+            "name": name,
+            "expression": dict(expression),
+            "publication_target": publication_target,
+        }
+        if domains is not None:
+            payload["domains"] = [dict(domain) for domain in domains]
+        if description is not None:
+            payload["description"] = description
+        if source is not None:
+            payload["source"] = source
+        if semantic_cross_check_max_cases is not None:
+            payload["semantic_cross_check_max_cases"] = int(semantic_cross_check_max_cases)
+        return self._request("POST", "/product/composition/generate", json=payload)
 
     def examples(self) -> list[dict[str, Any]]:
         payload = self._request("GET", "/qintent/examples")

@@ -144,6 +144,63 @@ def test_capabilities_uses_public_contract(monkeypatch: pytest.MonkeyPatch) -> N
     assert calls["url"].endswith("/qintent/capabilities")
 
 
+def test_composition_capabilities_uses_experimental_route(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = {}
+
+    class FakeResponse:
+        ok = True
+        status_code = 200
+
+        @staticmethod
+        def json():
+            return {
+                "status": "SUCCESS",
+                "semantic_composition_engine": {
+                    "maturity": "experimental",
+                    "release": {"contract": "qdsv_bridge_composition_experimental.v1"},
+                },
+            }
+
+    def fake_request(method, url, **kwargs):
+        calls.update({"method": method, "url": url})
+        return FakeResponse()
+
+    monkeypatch.setattr("qintent.client.requests.request", fake_request)
+    result = QIntentClient().composition_capabilities()
+
+    assert result["semantic_composition_engine"]["maturity"] == "experimental"
+    assert calls["method"] == "GET"
+    assert calls["url"].endswith("/product/composition/capabilities")
+
+
+def test_generate_composition_candidate_defaults_to_internal_publication(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = {}
+
+    class FakeResponse:
+        ok = True
+        status_code = 200
+
+        @staticmethod
+        def json():
+            return {"status": "SUCCESS", "candidate": {"state": "EXPERIMENTAL"}}
+
+    def fake_request(method, url, **kwargs):
+        calls.update({"method": method, "url": url, "kwargs": kwargs})
+        return FakeResponse()
+
+    monkeypatch.setattr("qintent.client.requests.request", fake_request)
+    result = QIntentClient().generate_composition_candidate(
+        name="risk_gate_v1",
+        expression={"op": "add", "args": [{"var": "x"}, 1]},
+        domains=[{"variable": "x", "type": "int_range", "start": 0, "end": 3}],
+    )
+
+    assert result["candidate"]["state"] == "EXPERIMENTAL"
+    assert calls["method"] == "POST"
+    assert calls["url"].endswith("/product/composition/generate")
+    assert calls["kwargs"]["json"]["publication_target"] == "internal_candidate"
+
+
 def test_private_node_transport_error_is_user_friendly(monkeypatch: pytest.MonkeyPatch) -> None:
     def fake_request(method, url, **kwargs):
         raise requests.ConnectionError("connection refused")

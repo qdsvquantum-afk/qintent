@@ -80,6 +80,15 @@ QIntent can also act as an upstream intent layer for QDSV Bridge when a workflow
 
 This route keeps QIntent positioned as the problem-intent language and uses QDSV Bridge, a Qiskit Ecosystem project, for the OpenQASM/Qiskit artifact handoff.
 
+## Automatic operation generation
+
+QIntent can inspect and submit requests to QDSV's Semantic Composition Engine
+through `composition_capabilities()` and
+`generate_composition_candidate()`. This is an **experimental capability**
+separate from the stable QIntent language contract. Responses identify
+`qdsv_bridge_composition_experimental.v1`; an `EXPERIMENTAL` candidate is not
+automatically published as a Bridge operation or promoted to `OFFICIAL`.
+
 ## What This Is
 
 - A lightweight Python client SDK for QIntent.
